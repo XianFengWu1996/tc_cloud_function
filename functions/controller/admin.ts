@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import { firestore } from 'firebase-admin';
 
+
 export const checkForAdminStatus: (uid: string) => boolean = (uid) => {
     let admin_list = process.env.ADMIN.split(", ");
-    console.log(admin_list);
-    console.log(uid);
 
     return admin_list.includes(uid);
 }
@@ -39,3 +38,4 @@ export const getStoreData = async(req: Request, res: Response) => {
         res.status(400).send({ error: (error as Error).message });
     }
 }
+

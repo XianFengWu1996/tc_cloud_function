@@ -29,6 +29,8 @@ adminApp.use('/', admin);
 const storeApp = express();
 storeApp.use(bodyParser.urlencoded({extended: false}));
 storeApp.use(bodyParser.json());
+storeApp.use(cookieParser());
+
 
 storeApp.use(helmet());
 storeApp.use(cors({

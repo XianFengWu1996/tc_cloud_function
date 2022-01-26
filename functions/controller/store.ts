@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { firestore } from "firebase-admin";
 import { addMinutes, getTime } from 'date-fns';
+import { validationResult } from "express-validator";
+import admin from "firebase-admin";
+import { checkForAdminStatus } from "./admin";
 
 
 export const getPublicInfo = async (req: Request, res: Response, next:NextFunction) => {
@@ -19,4 +22,24 @@ export const getPublicInfo = async (req: Request, res: Response, next:NextFuncti
         res.status(400).send({ error: (error as Error).message });
     }
 
+}
+
+export const updateStoreHour = async (req:Request, res: Response) => {
+    try {
+        if(!checkForAdminStatus(req.user.uid)) return res.status(401).send({ error: 'Unauthorize Request' });
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.status(400).json({ errors: errors.array() });
+        }
+
+        await admin.firestore().collection('/store').doc(process.env.STORE_ID).update({
+            'hours': req.body.hours
+        })
+
+        res.status(200).send()
+        
+    } catch (error) {
+        res.status(400).send({ error: (error as Error).message });
+    }
 }
