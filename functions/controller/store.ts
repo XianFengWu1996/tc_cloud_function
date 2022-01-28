@@ -10,7 +10,7 @@ export const getPublicInfo = async (req: Request, res: Response, next:NextFuncti
     try {
         let response = await firestore().collection('store').doc(process.env.STORE_ID).get();
 
-        let data  = response.data() as store;
+        let data  = response.data() as IStore;
         res.send({
             hours: data.hours,
             special_hour: data.special_hour,

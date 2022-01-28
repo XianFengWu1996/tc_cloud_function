@@ -1,8 +1,7 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { checkForAdminStatus } from '../controller/admin';
 import * as storeController from '../controller/store';
-import { checkFirebaseToken, checkTokenInCookie } from '../middleware/auth';
+import { checkTokenInCookie } from '../middleware/auth';
 
 const store = express.Router();
 

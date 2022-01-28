@@ -6,11 +6,6 @@ declare global {
     namespace Express {
       interface Request {
         user: auth.DecodedIdToken,
-        headers: {
-          cookie: {
-            ID_TOKEN: string | undefined
-          }
-        }
       }
     }
   }
