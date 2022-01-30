@@ -15,4 +15,8 @@ store.post('/hours', checkTokenInCookie, [
     body('hours.*.open_for_business').isBoolean(),
 ] , storeController.updateStoreHour)
 
+store.post('/status', 
+    checkTokenInCookie, 
+    storeController.updateServerStatus)
+
 export default store;
