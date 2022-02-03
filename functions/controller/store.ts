@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { firestore } from "firebase-admin";
 import { addMinutes, getTime } from 'date-fns';
 import { validationResult } from "express-validator";
-import admin from "firebase-admin";
+import admin, { firestore } from "firebase-admin";
 import { checkForAdminStatus } from "./admin";
 
 
@@ -56,3 +55,86 @@ export const updateServerStatus = async (req: Request, res:Response) => {
 
     res.status(200).send();
 }
+
+// interface ICategory{
+//     id: string, 
+//     ch_name: string,
+//     en_name: string, 
+//     dishes: INewDish[],
+//     document_name: string,
+//     order: number,
+// }
+
+// interface IOldDish {
+//     spicy: boolean,
+//     food_name_chinese: string,
+//     food_id: string,
+//     food_name: string,
+//     active: boolean,
+//     price: number,
+//     lunch?: boolean,
+//     options: []
+// }
+
+// interface INewDish {
+//     id: string,
+//     en_name: string,
+//     ch_name: string,
+//     is_spicy:boolean,
+//     is_popular: boolean,
+//     is_lunch: boolean,
+//     in_stock: boolean,
+//     price: number,
+//     variant: [],
+//     description: string,
+//     label_id: string,
+//     order: number,
+// }
+// export const transferMenuData = async (req: Request, res: Response) => {
+//     let response = await admin.firestore().collection('menu/lunch/details').get();
+//     let temp: ICategory[] = [];
+
+//     response.forEach((doc) => {
+//         let data = doc.data();
+//         let newDish:INewDish[] = [];
+
+//         let oldDishes:IOldDish[] = data.dishes;
+
+//         oldDishes.forEach((dish, index) => {
+//             newDish.push({
+//                 id: v4(),
+//                 en_name: dish.food_name,
+//                 ch_name: dish.food_name_chinese,
+//                 is_spicy: dish.spicy,
+//                 is_popular: false,
+//                 is_lunch: dish.lunch ?? false,
+//                 in_stock: dish.active,
+//                 price: dish.price,
+//                 variant: [],
+//                 description: '',
+//                 label_id: dish.food_id,
+//                 order: index + 1,
+//             })
+//         })
+
+        
+        
+//         temp.push({
+//             id: v4(),
+//             en_name: data.englishName,
+//             ch_name: data.chineseName,
+//             dishes: newDish,
+//             order:  0,
+//             document_name: data.document_name
+//         })
+//     })
+
+//     temp.forEach(async (el) => {
+//         await admin.firestore().collection(`menus/backup/lunch`).doc(el.document_name).set({
+//             el
+//         })
+//     })
+
+
+//     res.send(temp);
+// }

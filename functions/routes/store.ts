@@ -13,10 +13,12 @@ store.post('/hours', checkTokenInCookie, [
     body('hours.*.open_hour').isFloat({ min: 0, max: 1440}),
     body('hours.*.close_hour').isFloat({ min: 0, max: 1440}),
     body('hours.*.open_for_business').isBoolean(),
-] , storeController.updateStoreHour)
+] , storeController.updateStoreHour);
 
 store.post('/status', 
     checkTokenInCookie, 
-    storeController.updateServerStatus)
+    storeController.updateServerStatus);
+
+store.get('/menus', storeController.getAllMenu);
 
 export default store;
