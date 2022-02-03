@@ -3,6 +3,8 @@ import { addMinutes, getTime } from 'date-fns';
 import { validationResult } from "express-validator";
 import admin, { firestore } from "firebase-admin";
 import { checkForAdminStatus } from "./admin";
+import { v4 } from "uuid";
+// import { v4 } from "uuid";
 
 
 export const getPublicInfo = async (req: Request, res: Response, next:NextFunction) => {
@@ -56,40 +58,111 @@ export const updateServerStatus = async (req: Request, res:Response) => {
     res.status(200).send();
 }
 
-// interface ICategory{
-//     id: string, 
-//     ch_name: string,
-//     en_name: string, 
-//     dishes: INewDish[],
-//     document_name: string,
-//     order: number,
-// }
+interface ICategory{
+    id: string, 
+    ch_name: string,
+    en_name: string, 
+    dishes: INewDish[],
+    document_name: string,
+    order: number,
+}
 
-// interface IOldDish {
-//     spicy: boolean,
-//     food_name_chinese: string,
-//     food_id: string,
-//     food_name: string,
-//     active: boolean,
-//     price: number,
-//     lunch?: boolean,
-//     options: []
-// }
+interface INewDish {
+    id: string,
+    en_name: string,
+    ch_name: string,
+    is_spicy:boolean,
+    is_popular: boolean,
+    is_lunch: boolean,
+    in_stock: boolean,
+    price: number,
+    variant: [],
+    description: string,
+    label_id: string,
+    order: number,
+    pic_url:string,
+}
 
-// interface INewDish {
-//     id: string,
-//     en_name: string,
-//     ch_name: string,
-//     is_spicy:boolean,
-//     is_popular: boolean,
-//     is_lunch: boolean,
-//     in_stock: boolean,
-//     price: number,
-//     variant: [],
-//     description: string,
-//     label_id: string,
-//     order: number,
-// }
+export const getMenuData = async(req: Request, res:Response) => {
+    let fulldayResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('fullday').get();
+    let lunchResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('lunch').get();
+    let fullday: ICategory[] = [];
+    let lunch: ICategory[] = [];
+    let special: INewDish[] = [];
+
+
+    fulldayResult.docs.map((val) => {
+        let data = val.data();
+
+        let dishes: INewDish[] = data.dishes;
+        dishes.map((dish) => {
+            if(dish.is_popular){
+                special.push(dish);
+            }
+        })
+        
+        fullday.push({
+            id: data.id, 
+            ch_name: data.ch_name,
+            en_name: data.en_name, 
+            dishes: data.dishes,
+            document_name: data.document_name,
+            order: data.order,
+        })
+    });
+
+    lunchResult.docs.map((val) => {
+        let data = val.data();
+
+        lunch.push({
+            id: data.id, 
+            ch_name: data.ch_name,
+            en_name: data.en_name, 
+            dishes: data.dishes,
+            document_name: data.document_name,
+            order: data.order,
+        })
+
+        lunch.sort((a, b) => {
+            return a.order - b.order;
+        });
+    });
+
+    
+
+    // let lunch = []
+
+    // fulldayResult.docs.map((menu) => {
+    //     let data = menu.data();
+    //     console.log(data);
+    //     fullday.push({
+    //         id: data.id, 
+    //         ch_name: data.ch_name,
+    //         en_name: data.en_name, 
+    //         dishes: data.dishes,
+    //         document_name: data.document_name,
+    //         order: data.order,
+    //      });
+    // });
+
+
+    res.send({ lunch, special });
+}
+
+
+
+interface IOldDish {
+    spicy: boolean,
+    food_name_chinese: string,
+    food_id: string,
+    food_name: string,
+    active: boolean,
+    price: number,
+    lunch?: boolean,
+    options: []
+}
+
+
 // export const transferMenuData = async (req: Request, res: Response) => {
 //     let response = await admin.firestore().collection('menu/lunch/details').get();
 //     let temp: ICategory[] = [];
@@ -114,6 +187,7 @@ export const updateServerStatus = async (req: Request, res:Response) => {
 //                 description: '',
 //                 label_id: dish.food_id,
 //                 order: index + 1,
+//                 pic_url: '',
 //             })
 //         })
 
@@ -130,9 +204,9 @@ export const updateServerStatus = async (req: Request, res:Response) => {
 //     })
 
 //     temp.forEach(async (el) => {
-//         await admin.firestore().collection(`menus/backup/lunch`).doc(el.document_name).set({
+//         await admin.firestore().collection(`menus/${process.env.STORE_ID}/lunch`).doc(el.document_name).set(
 //             el
-//         })
+//         )
 //     })
 
 

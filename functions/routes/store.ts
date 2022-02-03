@@ -19,6 +19,6 @@ store.post('/status',
     checkTokenInCookie, 
     storeController.updateServerStatus);
 
-store.get('/menus', storeController.getAllMenu);
+store.get('/menus', storeController.getMenuData);
 
 export default store;
