@@ -19,7 +19,7 @@ adminApp.use(cookieParser());
 
 adminApp.use(helmet());
 adminApp.use(cors({
-    origin: true,
+    origin: true, 
     credentials: true,
 }));
 
@@ -33,10 +33,11 @@ storeApp.use(cookieParser());
 
 
 storeApp.use(helmet());
-storeApp.use(cors({
-    origin: true,
+storeApp.use(cors({ 
+    origin: true, 
     credentials: true,
 }));
+
 
 storeApp.use('/', store);
 
