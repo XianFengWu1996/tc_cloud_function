@@ -3,7 +3,6 @@ import { addMinutes, getTime } from 'date-fns';
 import { validationResult } from "express-validator";
 import admin, { firestore } from "firebase-admin";
 import { checkForAdminStatus } from "./admin";
-import { v4 } from "uuid";
 // import { v4 } from "uuid";
 
 
@@ -58,50 +57,52 @@ export const updateServerStatus = async (req: Request, res:Response) => {
     res.status(200).send();
 }
 
-interface ICategory{
-    id: string, 
-    ch_name: string,
-    en_name: string, 
-    dishes: INewDish[],
-    document_name: string,
-    order: number,
-}
-
-interface INewDish {
-    id: string,
-    en_name: string,
-    ch_name: string,
-    is_spicy:boolean,
-    is_popular: boolean,
-    is_lunch: boolean,
-    in_stock: boolean,
-    price: number,
-    variant: [],
-    description: string,
-    label_id: string,
-    order: number,
-    pic_url:string,
-}
-
 export const getMenuData = async(req: Request, res:Response) => {
     let fulldayResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('fullday').get();
     let lunchResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('lunch').get();
-    let fullday: ICategory[] = [];
-    let lunch: ICategory[] = [];
-    let special: INewDish[] = [];
+    let fullday: IMenu = {
+        id: '25fe4551-6209-421f-9fdb-e5d20f5bbb62',
+        en_name: 'Fullday',
+        ch_name: '全天',
+        category: []
+    } ;
+    let lunch: IMenu = {
+        id: '7dd0d06a-0aa8-4bb0-be00-459f8fb88ace',
+        en_name: 'Lunch',
+        ch_name: '午餐',
+        category: []
+    };
+
+    let special: IMenu = {
+        id: 'ca9fe450-064c-4f9c-b3b0-8ead68d88822',
+        en_name: 'Most Popular',
+        ch_name: '推荐菜',
+        category: []
+    }
+
+    // create a category for this menu, will be the only category
+    special.category.push({
+        dishes: [],
+        id: 'e73b80d4-41f9-4eae-89b3-f9eb72c492a2', 
+        ch_name: '推荐菜',
+        en_name: 'Most Popular', 
+        document_name: '',
+        order: 0,
+    })
+    
 
 
     fulldayResult.docs.map((val) => {
         let data = val.data();
 
-        let dishes: INewDish[] = data.dishes;
+        let dishes: IDish[] = data.dishes;
         dishes.map((dish) => {
             if(dish.is_popular){
-                special.push(dish);
+                special.category[0].dishes.push(dish);
             }
         })
         
-        fullday.push({
+        fullday.category.push({
             id: data.id, 
             ch_name: data.ch_name,
             en_name: data.en_name, 
@@ -109,12 +110,16 @@ export const getMenuData = async(req: Request, res:Response) => {
             document_name: data.document_name,
             order: data.order,
         })
+
+        fullday.category.sort((a, b) => {
+            return a.order - b.order;
+        });
     });
 
     lunchResult.docs.map((val) => {
         let data = val.data();
 
-        lunch.push({
+        lunch.category.push({
             id: data.id, 
             ch_name: data.ch_name,
             en_name: data.en_name, 
@@ -123,44 +128,20 @@ export const getMenuData = async(req: Request, res:Response) => {
             order: data.order,
         })
 
-        lunch.sort((a, b) => {
+        lunch.category.sort((a, b) => {
             return a.order - b.order;
         });
     });
 
-    
 
-    // let lunch = []
-
-    // fulldayResult.docs.map((menu) => {
-    //     let data = menu.data();
-    //     console.log(data);
-    //     fullday.push({
-    //         id: data.id, 
-    //         ch_name: data.ch_name,
-    //         en_name: data.en_name, 
-    //         dishes: data.dishes,
-    //         document_name: data.document_name,
-    //         order: data.order,
-    //      });
-    // });
-
-
-    res.send({ lunch, special });
+    res.status(200).send({ 
+        fullday, 
+        lunch, 
+        special, 
+        minuteToExpire: 30 
+    });
 }
 
-
-
-interface IOldDish {
-    spicy: boolean,
-    food_name_chinese: string,
-    food_id: string,
-    food_name: string,
-    active: boolean,
-    price: number,
-    lunch?: boolean,
-    options: []
-}
 
 
 // export const transferMenuData = async (req: Request, res: Response) => {
