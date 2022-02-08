@@ -3,8 +3,9 @@ import { addMinutes, getTime } from 'date-fns';
 import { validationResult } from "express-validator";
 import admin, { firestore } from "firebase-admin";
 import { checkForAdminStatus } from "./admin";
-// import { v4 } from "uuid";
-
+import { createPersistentDownloadUrl } from '../utils/url'
+import { v4 } from 'uuid'
+``
 
 export const getPublicInfo = async (req: Request, res: Response, next:NextFunction) => {
     try {
@@ -58,6 +59,7 @@ export const updateServerStatus = async (req: Request, res:Response) => {
 }
 
 export const getMenuData = async(req: Request, res:Response) => {
+   try {
     let fulldayResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('fullday').get();
     let lunchResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('lunch').get();
     let fullday: IMenu = {
@@ -90,8 +92,6 @@ export const getMenuData = async(req: Request, res:Response) => {
         order: 0,
     })
     
-
-
     fulldayResult.docs.map((val) => {
         let data = val.data();
 
@@ -133,17 +133,42 @@ export const getMenuData = async(req: Request, res:Response) => {
         });
     });
 
-
     res.status(200).send({ 
         fullday, 
         lunch, 
         special, 
         minuteToExpire: 30 
     });
+   } catch (error) {
+        res.status(400).send({ error: (error as Error).message ?? 'Failed to get menu' })
+   }
+}
+
+export const uploadImage = async(req: Request, res:Response) => {
+    // Since the multer middleware does not work with cloud function, 
+    // the functions need to run through a middleware to gather the raw data and convert it into req.body.file
+    try {
+        // the file will be available as req.body.file 
+        let file = req.body.file as IFile;
+
+        // all the images related to the menu will be place into the menu bucket
+        const bucket = admin.storage().bucket('taipeicuisine_menu');
+
+        // the file name will be the original file name that was passed from the client side
+        const bucket_file = bucket.file(`${file.originalname}`);
+
+        // save the file to the cloud storage
+        await bucket_file.save(file.buffer);
+
+        // generate a public url for the image
+        res.status(200).send({ url: createPersistentDownloadUrl(bucket.name, file.originalname, v4()) });
+    } catch (error) {
+        res.status(400).send({ error: (error as Error).message ?? 'Failed to upload image' })
+    }
 }
 
 
-
+// for own use purpose only
 // export const transferMenuData = async (req: Request, res: Response) => {
 //     let response = await admin.firestore().collection('menu/lunch/details').get();
 //     let temp: ICategory[] = [];
