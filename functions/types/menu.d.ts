@@ -29,3 +29,12 @@ interface IDish {
     order: number,
     pic_url:string,
 }
+
+interface IFile{
+    fieldname: string,
+    originalname: string,
+    encoding: string | undefined,
+    mimetype: string |undefined,
+    buffer: Buffer,
+    size: number
+}
