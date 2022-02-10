@@ -4,6 +4,7 @@ import { validationResult } from "express-validator";
 import admin, { firestore } from "firebase-admin";
 import { checkForAdminStatus } from "./admin";
 import { createPersistentDownloadUrl } from '../utils/url'
+import { checkForValidDishData } from '../utils/validateData'
 import { v4 } from 'uuid'
 ``
 
@@ -144,7 +145,54 @@ export const getMenuData = async(req: Request, res:Response) => {
    }
 }
 
+export const updateMenu = async(req: Request, res: Response) => {
+    try {
+        // CHECK FOR ALL REQUIRED DATA
+        let menu_name = '';
+        if(req.query.menuId === process.env.FULLDAY_MENUID)  menu_name = 'fullday'
+        if(req.query.menuId === process.env.LUNCH_MENUID) menu_name = 'lunch'
+
+        if(!req.query.category_name) {throw new Error('Category name must be provided')}
+        if(menu_name.length === 0) throw new Error('Menu id does not match')
+        if(!req.params.dishId) throw new Error('Dish id is not provided')
+        if(!req.body.difference) throw new Error('No update required')
+        
+        if(!checkForValidDishData(req.body.difference)){
+            throw new Error('Dish data is not valid')
+        }
+
+        let doc_ref = admin.firestore().collection('menus').doc(process.env.STORE_ID).collection(menu_name).doc(`${req.query.category_name}`);
+
+        admin.firestore().runTransaction(async (transaction) => {
+            // search the database for the specific dish
+            let categoryDoc = (await transaction.get(doc_ref)).data();
+
+            // if the doc is found
+            if(categoryDoc){
+                let dishes: IDish[] = categoryDoc.dishes;
+                let targetIndex = dishes.findIndex((dish) => dish.id === req.params.dishId);
+    
+                let newObj = {
+                    ...dishes[targetIndex],
+                    ...req.body.difference
+                }
+    
+                dishes[targetIndex] = newObj;
+                 
+                transaction.update(doc_ref, { dishes });
+                res.status(200).send({ dish: dishes[targetIndex ]});
+            }
+        }).catch(() => {
+            res.status(400).send();
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(400).send()
+    }
+}
+
 export const uploadImage = async(req: Request, res:Response) => {
+    console.log(req.file);
     // Since the multer middleware does not work with cloud function, 
     // the functions need to run through a middleware to gather the raw data and convert it into req.body.file
     try {
@@ -155,7 +203,7 @@ export const uploadImage = async(req: Request, res:Response) => {
         const bucket = admin.storage().bucket('taipeicuisine_menu');
 
         // the file name will be the original file name that was passed from the client side
-        const bucket_file = bucket.file(`${file.originalname}`);
+        const bucket_file = bucket.file(v4());
 
         // save the file to the cloud storage
         await bucket_file.save(file.buffer);
@@ -163,6 +211,7 @@ export const uploadImage = async(req: Request, res:Response) => {
         // generate a public url for the image
         res.status(200).send({ url: createPersistentDownloadUrl(bucket.name, file.originalname, v4()) });
     } catch (error) {
+        console.log(error);
         res.status(400).send({ error: (error as Error).message ?? 'Failed to upload image' })
     }
 }

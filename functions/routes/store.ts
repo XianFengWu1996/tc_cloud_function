@@ -13,14 +13,13 @@ store.post('/hours', checkTokenInCookie, [
     body('hours.*.day_of_week').isString().trim(),
     body('hours.*.open_hour').isFloat({ min: 0, max: 1440}),
     body('hours.*.close_hour').isFloat({ min: 0, max: 1440}),
-    body('hours.*.open_for_business').isBoolean(),
-] , storeController.updateStoreHour);
+    body('hours.*.open_for_business').isBoolean(),], storeController.updateStoreHour);
 
-store.post('/status', 
-    checkTokenInCookie, 
-    storeController.updateServerStatus);
+store.post('/status', checkTokenInCookie, storeController.updateServerStatus);
 
 store.get('/menus', storeController.getMenuData);
+
+store.patch('/menus/:dishId',storeController.updateMenu);
 
 store.post('/menus/image/upload', filesUpload, storeController.uploadImage)
 
