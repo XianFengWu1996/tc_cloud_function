@@ -32,8 +32,12 @@ export const getStoreData = async(req: Request, res: Response) => {
         if(!checkForAdminStatus(req.user.uid)) return res.status(401).send({ error: 'Unauthorize Request' });
 
         let response = await firestore().collection('store').doc(process.env.STORE_ID).get();
+        
+        let storeData = response.data();
+        delete storeData!.reward
+        delete storeData!.store_id
 
-        res.status(200).send({ storeData: response.data() })
+        res.status(200).send({ storeData })
     } catch (error) {
         res.status(400).send({ error: (error as Error).message });
     }
