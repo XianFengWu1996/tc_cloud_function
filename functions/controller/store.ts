@@ -50,7 +50,7 @@ export const updateServerStatus = async (req: Request, res:Response) => {
     if(typeof req.body.server_is_on !== 'boolean'){
         return res.status(400).send({ error: 'Please double check data, invalid data'})
     }
-    admin.firestore().collection('/store').doc(process.env.STORE_ID).update({
+    await admin.firestore().collection('/store').doc(process.env.STORE_ID).update({
         server_is_on: req.body.server_is_on
     }).catch((_) => {
         return res.status(400).send({ error: 'Operation failed' });
