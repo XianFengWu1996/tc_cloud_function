@@ -18,7 +18,7 @@ const adminApp = express();
 
 adminApp.use(helmet());
 adminApp.use(cors({
-    origin: true, 
+    origin: 'http://localhost:3000', 
     credentials: true,
 }));
 
@@ -35,7 +35,7 @@ adminApp.use('/', admin);
 const storeApp = express();
 storeApp.use(helmet());
 storeApp.use(cors({ 
-    origin: true, 
+    origin: 'http://localhost:3000', 
     credentials: true,
 }));
 storeApp.use(bodyParser.urlencoded({extended: true}));

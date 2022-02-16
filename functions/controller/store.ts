@@ -21,7 +21,7 @@ export const getPublicInfo = async (req: Request, res: Response, next:NextFuncti
             expiration: getTime(addMinutes(Date.now(), 30)),
         }); 
     } catch (error) {
-        res.status(400).send({ error: (error as Error).message });
+        res.status(400).send({ error: (error as Error).message ?? 'Failed to get store info' });
     }
 
 }
@@ -163,7 +163,7 @@ export const updateMenu = async(req: Request, res: Response) => {
 
         let doc_ref = admin.firestore().collection('menus').doc(process.env.STORE_ID).collection(menu_name).doc(`${req.query.category_name}`);
 
-        admin.firestore().runTransaction(async (transaction) => {
+        await admin.firestore().runTransaction(async (transaction) => {
             // search the database for the specific dish
             let categoryDoc = (await transaction.get(doc_ref)).data();
 
@@ -180,22 +180,21 @@ export const updateMenu = async(req: Request, res: Response) => {
                 dishes[targetIndex] = newObj;
                  
                 transaction.update(doc_ref, { dishes });
-                res.status(200).send({ dish: dishes[targetIndex ]});
             }
-        }).catch(() => {
-            res.status(400).send();
         })
+        res.status(200).send();
     } catch (error) {
-        console.log(error)
-        res.status(400).send()
+        res.status(400).send({ error: (error as Error).message ?? 'Failed to update dish'})
     }
 }
 
 export const uploadImage = async(req: Request, res:Response) => {
-    console.log(req.file);
-    // Since the multer middleware does not work with cloud function, 
-    // the functions need to run through a middleware to gather the raw data and convert it into req.body.file
+
     try {
+        const tempFileName = `${v4()}.jpg`;
+        // Since the multer middleware does not work with cloud function, 
+        // the functions need to run through a middleware to gather the raw data and convert it into req.body.file
+   
         // the file will be available as req.body.file 
         let file = req.body.file as IFile;
 
@@ -203,13 +202,13 @@ export const uploadImage = async(req: Request, res:Response) => {
         const bucket = admin.storage().bucket('taipeicuisine_menu');
 
         // the file name will be the original file name that was passed from the client side
-        const bucket_file = bucket.file(v4());
+        const bucket_file = bucket.file(tempFileName);
 
         // save the file to the cloud storage
         await bucket_file.save(file.buffer);
 
         // generate a public url for the image
-        res.status(200).send({ url: createPersistentDownloadUrl(bucket.name, file.originalname, v4()) });
+        res.status(200).send({ url: createPersistentDownloadUrl(bucket.name, tempFileName, v4()) });
     } catch (error) {
         console.log(error);
         res.status(400).send({ error: (error as Error).message ?? 'Failed to upload image' })

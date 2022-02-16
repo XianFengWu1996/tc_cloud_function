@@ -30,8 +30,7 @@ export const checkTokenInCookie = async (req: Request, res:Response, next:NextFu
         req.user = decode;
 
         next();
-    } catch (error) {
-        console.log(error);
-        return res.status(401).send({ error: 'Unauthorize request'});
+    } catch (error ) {
+        return res.status(401).send({ error: (error as Error).message ??  'Unauthorize request'});
     }
 }

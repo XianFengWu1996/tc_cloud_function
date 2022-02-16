@@ -19,8 +19,8 @@ store.post('/status', checkTokenInCookie, storeController.updateServerStatus);
 
 store.get('/menus', storeController.getMenuData);
 
-store.patch('/menus/:dishId',storeController.updateMenu);
+store.patch('/menus/:dishId',checkTokenInCookie, storeController.updateMenu);
 
-store.post('/menus/image/upload', filesUpload, storeController.uploadImage)
+store.post('/menus/image/upload', checkTokenInCookie, filesUpload, storeController.uploadImage)
 
 export default store;
