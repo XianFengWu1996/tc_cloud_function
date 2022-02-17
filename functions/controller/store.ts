@@ -64,20 +64,20 @@ export const getMenuData = async(req: Request, res:Response) => {
     let fulldayResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('fullday').get();
     let lunchResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('lunch').get();
     let fullday: IMenu = {
-        id: '25fe4551-6209-421f-9fdb-e5d20f5bbb62',
+        id: process.env.FULLDAY_MENUID,
         en_name: 'Fullday',
         ch_name: '全天',
         category: []
     } ;
     let lunch: IMenu = {
-        id: '7dd0d06a-0aa8-4bb0-be00-459f8fb88ace',
+        id: process.env.LUNCH_MENUID,
         en_name: 'Lunch',
         ch_name: '午餐',
         category: []
     };
 
     let special: IMenu = {
-        id: 'ca9fe450-064c-4f9c-b3b0-8ead68d88822',
+        id: process.env.SPECIAL_MENUID,
         en_name: 'Most Popular',
         ch_name: '推荐菜',
         category: []
@@ -86,7 +86,7 @@ export const getMenuData = async(req: Request, res:Response) => {
     // create a category for this menu, will be the only category
     special.category.push({
         dishes: [],
-        id: 'e73b80d4-41f9-4eae-89b3-f9eb72c492a2', 
+        id: process.env.SPECIAL_CATEGORYID, 
         ch_name: '推荐菜',
         en_name: 'Most Popular', 
         document_name: '',
