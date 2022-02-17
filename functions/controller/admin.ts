@@ -37,7 +37,12 @@ export const getStoreData = async(req: Request, res: Response) => {
         delete storeData!.reward
         delete storeData!.store_id
 
-        res.status(200).send({ storeData })
+        const expiration = Date.now() + (15 * 60 * 1000); // 15 minutes 
+
+        res.status(200).send({ storeData: {
+            ...storeData,
+            expiration
+        }})
     } catch (error) {
         res.status(400).send({ error: (error as Error).message });
     }
