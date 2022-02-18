@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { firestore } from 'firebase-admin';
+import { addMinutesToTimestamp } from '../utils/time'
 
 
 export const checkForAdminStatus: (uid: string) => boolean = (uid) => {
@@ -36,12 +37,10 @@ export const getStoreData = async(req: Request, res: Response) => {
         let storeData = response.data();
         delete storeData!.reward
         delete storeData!.store_id
-
-        const expiration = Date.now() + (15 * 60 * 1000); // 15 minutes 
-
+        
         res.status(200).send({ storeData: {
             ...storeData,
-            expiration
+            expiration: addMinutesToTimestamp(15)
         }})
     } catch (error) {
         res.status(400).send({ error: (error as Error).message });

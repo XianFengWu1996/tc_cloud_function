@@ -6,6 +6,7 @@ import { checkForAdminStatus } from "./admin";
 import { createPersistentDownloadUrl } from '../utils/url'
 import { checkForValidDishData } from '../utils/validateData'
 import { v4 } from 'uuid'
+import { addMinutesToTimestamp } from "../utils/time";
 ``
 
 export const getPublicInfo = async (req: Request, res: Response, next:NextFunction) => {
@@ -138,7 +139,7 @@ export const getMenuData = async(req: Request, res:Response) => {
         fullday, 
         lunch, 
         special, 
-        minuteToExpire: 30 
+        expiration: addMinutesToTimestamp(15)
     });
    } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to get menu' })
