@@ -23,11 +23,22 @@ interface IDish {
     is_lunch: boolean,
     in_stock: boolean,
     price: number,
-    variant: [],
+    variant: [IVarirant],
     description: string,
     label_id: string,
     order: number,
     pic_url:string,
+}
+
+interface IVarirant{
+    en_name: string,
+    ch_name:string,
+    options: {
+        id: string,
+        en_name: string,
+        ch_name:string,
+        price: number,
+    }
 }
 
 interface IFile{

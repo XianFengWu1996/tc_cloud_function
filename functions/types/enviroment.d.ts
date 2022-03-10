@@ -8,7 +8,8 @@ declare global {
         FULLDAY_MENUID: string,
         LUNCH_MENUID:string,
         SPECIAL_MENUID: string,
-        SPECIAL_CATEGORYID: string
+        SPECIAL_CATEGORYID: string,
+        SMS_KEY: string,
       }
     }
   }

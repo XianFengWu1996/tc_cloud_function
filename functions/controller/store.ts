@@ -7,7 +7,6 @@ import { createPersistentDownloadUrl } from '../utils/url'
 import { checkForValidDishData } from '../utils/validateData'
 import { v4 } from 'uuid'
 import { addMinutesToTimestamp } from "../utils/time";
-``
 
 export const getPublicInfo = async (req: Request, res: Response, next:NextFunction) => {
     try {

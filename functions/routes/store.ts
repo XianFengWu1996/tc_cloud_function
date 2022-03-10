@@ -1,6 +1,7 @@
 import express from 'express';
 import { body } from 'express-validator';
 import * as storeController from '../controller/store';
+import * as messageController from '../controller/message';
 import { checkTokenInCookie } from '../middleware/auth';
 import { filesUpload } from '../middleware/upload'
 
@@ -23,4 +24,8 @@ store.patch('/menus/:dishId',checkTokenInCookie, storeController.updateMenu);
 
 store.post('/menus/image/upload', checkTokenInCookie, filesUpload, storeController.uploadImage)
 
+
+
+// MESSAGE 
+store.post('/message/send', messageController.sendMessage);
 export default store;
