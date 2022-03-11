@@ -9,6 +9,8 @@ const store = express.Router();
 
 store.get('/', storeController.getPublicInfo);
 
+
+// ADMIN 
 store.post('/hours', checkTokenInCookie, [
     body('hours').isArray({ min:7, max: 7}).withMessage('Invalid number of days'),
     body('hours.*.day_of_week').isString().trim(),
@@ -28,4 +30,9 @@ store.post('/menus/image/upload', checkTokenInCookie, filesUpload, storeControll
 
 // MESSAGE 
 store.post('/message/send', messageController.sendMessage);
+
+store.post('/message/verify', messageController.verifyCode);
+
+
+
 export default store;
