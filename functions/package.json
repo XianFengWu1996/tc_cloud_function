@@ -26,6 +26,7 @@
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^3.14.1",
     "helmet": "^5.0.1",
+    "lodash": "^4.17.21",
     "telnyx": "^1.23.0",
     "uuid": "^8.3.2",
     "validator": "^13.7.0",
