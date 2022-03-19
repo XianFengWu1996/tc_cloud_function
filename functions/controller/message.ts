@@ -40,7 +40,11 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
         //     }
         // })
 
-        // console.log(response.data)
+        // console.log(response.data)\
+
+        setTimeout(() => {
+            console.log(`${code} has been sent`);
+        }, 2000)
         
         await admin.firestore().collection('/sms_verification').doc(c_id).set({
             c_id, 
@@ -51,7 +55,6 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
 
         res.cookie('c_id', c_id, {
             maxAge: minutesToMilliseconds(15),
-            httpOnly: true,
         })
 
         res.status(200).send();
@@ -105,8 +108,24 @@ export const verifyCode = async (req: Request, res: Response, next: NextFunction
         if(!isEqual(code_data.code.toString(), code.toString())){
             return res.status(400).send({ error: 'The code does not match' })
         }
-    
-        res.status(200).send();
+
+        // once it's successful
+        // remove the document from firestore
+        await admin.firestore().collection('/sms_verification').doc(c_id).delete();
+
+
+        console.log(req.user.uid);
+        //todo: add the phone number to the user info
+        await admin.firestore().collection('/usersTest').doc(req.user.uid).set({
+            
+        })
+        
+        // remove the cookie
+        res.clearCookie('c_id');
+
+        res.status(200).send({
+            phone_number: code_data.phone_num
+        });
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to verify sms code'});
     }

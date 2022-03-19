@@ -18,7 +18,7 @@ const adminApp = express();
 
 adminApp.use(helmet());
 adminApp.use(cors({
-    origin: 'http://localhost:3000', 
+    origin: ['http://localhost:3000', 'https://5808-2603-3005-4236-2000-8015-a859-80a-2694.ngrok.io'], 
     credentials: true,
 }));
 
@@ -35,7 +35,8 @@ adminApp.use('/', admin);
 const storeApp = express();
 storeApp.use(helmet());
 storeApp.use(cors({ 
-    origin: 'http://localhost:3000', 
+    origin: ['http://localhost:3000','https://5808-2603-3005-4236-2000-8015-a859-80a-2694.ngrok.io'], 
+    // origin: '*',
     credentials: true,
 }));
 storeApp.use(bodyParser.urlencoded({extended: true}));
@@ -44,7 +45,7 @@ storeApp.use(cookieParser());
 
 storeApp.use('/', store);
 
-exports.admin = functions.https.onRequest(adminApp);
-exports.store = functions.https.onRequest(storeApp);
+exports.admin = functions.region('us-east4').https.onRequest(adminApp);
+exports.store = functions.region('us-east4').https.onRequest(storeApp);
   
 

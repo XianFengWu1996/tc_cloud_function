@@ -2,7 +2,7 @@ import express from 'express';
 import { body } from 'express-validator';
 import * as storeController from '../controller/store';
 import * as messageController from '../controller/message';
-import { checkTokenInCookie } from '../middleware/auth';
+import { checkFirebaseToken, checkTokenInCookie } from '../middleware/auth';
 import { filesUpload } from '../middleware/upload'
 
 const store = express.Router();
@@ -29,9 +29,9 @@ store.post('/menus/image/upload', checkTokenInCookie, filesUpload, storeControll
 
 
 // MESSAGE 
-store.post('/message/send', messageController.sendMessage);
+store.post('/message/send', checkFirebaseToken, messageController.sendMessage);
 
-store.post('/message/verify', messageController.verifyCode);
+store.post('/message/verify', checkFirebaseToken, messageController.verifyCode);
 
 
 
