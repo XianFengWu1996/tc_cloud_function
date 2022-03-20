@@ -8,6 +8,13 @@ import { minutesToMilliseconds } from "date-fns";
 import { addMinutesToTimestamp, hasExpire } from "../utils/time";
 import { isEmpty, isEqual } from "lodash";
 
+interface ICodeData {
+    expiration: number,
+    code: number | string,
+    c_id: string,
+    phone_num: string,
+}
+
 export const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // CHECK IF THE PHONE NUMBER IS PROVIDED
@@ -72,12 +79,6 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
     }
 }
 
-interface ICodeData {
-    expiration: number,
-    code: number | string,
-    c_id: string,
-    phone_num: string,
-}
 export const verifyCode = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // check for the cookie, required to check for the code in the backend
