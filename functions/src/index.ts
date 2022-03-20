@@ -1,51 +1,27 @@
 import 'dotenv/config'
-import express from "express";
 import { initializeApp } from "firebase-admin";
 
 import * as functions from "firebase-functions";
-import helmet from "helmet";
-import cors from "cors";
-import bodyParser from "body-parser";
-import cookieParser from 'cookie-parser';
-
 import store from '../routes/store'
 import admin from '../routes/admin';
+import auth from '../routes/auth';
+import { base_app } from './config/base';
 
 initializeApp()
 
 // THE EXPRESS APP FOR ADMIN 
-const adminApp = express();
+const admin_app = base_app;
+admin_app.use('/', admin);
 
-adminApp.use(helmet());
-adminApp.use(cors({
-    origin: ['http://localhost:3000', 'https://5808-2603-3005-4236-2000-8015-a859-80a-2694.ngrok.io'], 
-    credentials: true,
-}));
+const store_app = base_app;
+store_app.use('/', store);
 
-adminApp.use(bodyParser.urlencoded({extended: true}));
-adminApp.use(bodyParser.json());
-adminApp.use(cookieParser());
+const auth_app = base_app;
+auth_app.use('/', auth);
 
+exports.admin = functions.region('us-east4').https.onRequest(admin_app);
+exports.store = functions.region('us-east4').https.onRequest(store_app);
+exports.auth = functions.region('us-east4').https.onRequest(auth_app);
 
-
-
-adminApp.use('/', admin);
-
-// THE EXPRESS APP FOR STORE
-const storeApp = express();
-storeApp.use(helmet());
-storeApp.use(cors({ 
-    origin: ['http://localhost:3000','https://5808-2603-3005-4236-2000-8015-a859-80a-2694.ngrok.io'], 
-    // origin: '*',
-    credentials: true,
-}));
-storeApp.use(bodyParser.urlencoded({extended: true}));
-storeApp.use(bodyParser.json());
-storeApp.use(cookieParser());
-
-storeApp.use('/', store);
-
-exports.admin = functions.region('us-east4').https.onRequest(adminApp);
-exports.store = functions.region('us-east4').https.onRequest(storeApp);
   
 

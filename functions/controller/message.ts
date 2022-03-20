@@ -109,15 +109,22 @@ export const verifyCode = async (req: Request, res: Response, next: NextFunction
             return res.status(400).send({ error: 'The code does not match' })
         }
 
-        // once it's successful
-        // remove the document from firestore
-        await admin.firestore().collection('/sms_verification').doc(c_id).delete();
+        await admin.firestore().runTransaction(async (transaction) => {
+            const sms_ref = admin.firestore().collection('/sms_verification').doc(c_id);
+            const user_ref = admin.firestore().collection('/usersTest').doc(req.user.uid);
 
+            const user = transaction.get(user_ref);
 
-        console.log(req.user.uid);
-        //todo: add the phone number to the user info
-        await admin.firestore().collection('/usersTest').doc(req.user.uid).set({
-            
+            console.log((await user).exists);
+
+            // if(!(await user).exists){
+                
+            // }
+
+            transaction.delete(sms_ref)  // remove the document from firestore
+            transaction.update(user_ref, {
+                phone: code_data.phone_num
+            })  // update the phone and phone list
         })
         
         // remove the cookie
