@@ -1,8 +1,7 @@
 import express from 'express';
 import { body } from 'express-validator';
 import * as storeController from '../controller/store';
-import * as messageController from '../controller/message';
-import { checkFirebaseToken, checkTokenInCookie } from '../middleware/auth';
+import {  checkTokenInCookie } from '../middleware/auth';
 import { filesUpload } from '../middleware/upload'
 
 const store = express.Router();
@@ -25,14 +24,6 @@ store.get('/menus', storeController.getMenuData);
 store.patch('/menus/:dishId',checkTokenInCookie, storeController.updateMenu);
 
 store.post('/menus/image/upload', checkTokenInCookie, filesUpload, storeController.uploadImage)
-
-
-
-// MESSAGE 
-store.post('/message/send', checkFirebaseToken, messageController.sendMessage);
-
-store.post('/message/verify', checkFirebaseToken, messageController.verifyCode);
-
 
 
 export default store;
