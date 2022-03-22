@@ -7,12 +7,28 @@ import admin from 'firebase-admin'
 import { minutesToMilliseconds } from "date-fns";
 import { addMinutesToTimestamp, hasExpire } from "../utils/time";
 import { isEmpty, isEqual } from "lodash";
+import { user } from "firebase-functions/v1/auth";
 
 interface ICodeData {
     expiration: number,
     code: number | string,
     c_id: string,
     phone_num: string,
+}
+
+const checkForValidPhoneNumber = (phone: string) => {
+    // CHECK IF THE PHONE NUMBER IS PROVIDED
+    if(!phone){
+        throw new Error('Phone number must be provided');
+    }
+    // CHECK IF THE PHONE NUMBER IS STRING
+    if(typeof phone !== 'string'){
+        throw new Error('Please double check the phone number data type');
+    }
+    // CHECK IF THE PHONE NUMBER IS A VALID US PHONE NUMBER
+    if(!validator.isMobilePhone(phone, "en-US")){
+        throw new Error('Not a valid US phone number');
+    }
 }
 
 export const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
@@ -75,7 +91,7 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
         // let err = (error as AxiosError)
         // console.log(err.response?.data);
         logger.error((error as Error).message);
-        res.status(500).send({ error: 'Unable to complete the request'});
+        res.status(400).send({ error: 'Unable to complete the request'});
     }
 }
 
@@ -87,7 +103,7 @@ export const verifyCode = async (req: Request, res: Response, next: NextFunction
         }
 
         if(!req.body.code){
-            return res.status(400).send({ error: 'No code was provided'});
+            throw new Error('No code was provided')
         }
 
         let c_id: string = req.cookies.c_id;
@@ -98,16 +114,16 @@ export const verifyCode = async (req: Request, res: Response, next: NextFunction
 
         // check if the code data exist 
         if(!code_data || isEmpty(code_data)){
-            return res.status(400).send({ error: 'Code has either expire or not found'});
+            throw new Error('Code has either expire or not found')
         }   
         // check if the code data has expire or not
         if(hasExpire(code_data.expiration)){
-            return res.status(400).send({ error: 'The code has expired' });
+            throw new Error('The code has expired')
         }
 
         // compare the codes        
         if(!isEqual(code_data.code.toString(), code.toString())){
-            return res.status(400).send({ error: 'The code does not match' })
+            throw new Error('The code does not match');
         }
 
         let phone_list: string[] = [];
@@ -160,5 +176,31 @@ export const setDefaultPhoneNum = async (req: Request, res: Response, next: Next
         res.status(200).send();
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to set default phone number'})
+    }
+}
+
+export const deletePhoneNum = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        checkForValidPhoneNumber(req.body.phone);
+
+        let user_ref = admin.firestore().collection('/usersTest').doc(req.user.uid);
+
+        let phone_list: string[] = []
+
+        await admin.firestore().runTransaction(async (transaction) => {
+            let user_data = (await transaction.get(user_ref)).data();
+
+            phone_list = user_data?.phone_list;
+
+            let new_phone_list = phone_list.filter((phone) => {
+                return phone !== req.body.phone
+            })
+
+            transaction.update(user_ref, { phone_list:  new_phone_list });
+        })
+
+        res.status(200).send();
+    } catch (error) {
+        res.status(400).send({ error: (error as Error).message ?? 'Fail to delete phone number'})
     }
 }
