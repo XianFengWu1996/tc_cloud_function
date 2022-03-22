@@ -42,8 +42,6 @@ export const Signin = async (req: Request, res: Response, next: NextFunction) =>
         })
 
         res.status(200).send();
-
-
     } catch (error) {
         res.status(400).send({ error: 'Failed to login'});
     }

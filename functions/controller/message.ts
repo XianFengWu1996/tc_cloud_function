@@ -110,21 +110,23 @@ export const verifyCode = async (req: Request, res: Response, next: NextFunction
             return res.status(400).send({ error: 'The code does not match' })
         }
 
+        let phone_list: string[] = [];
+
         await admin.firestore().runTransaction(async (transaction) => {
             const sms_ref = admin.firestore().collection('/sms_verification').doc(c_id);
             const user_ref = admin.firestore().collection('/usersTest').doc(req.user.uid);
 
-            const user = transaction.get(user_ref);
+            // update the user phone data in firestore
+            const user_data = (await transaction.get(user_ref)).data();
 
-            console.log((await user).exists);
+            phone_list = user_data?.phone_list ?  user_data.phone_list : [];
 
-            // if(!(await user).exists){
-                
-            // }
+            phone_list.unshift(code_data.phone_num)
 
             transaction.delete(sms_ref)  // remove the document from firestore
             transaction.update(user_ref, {
-                phone: code_data.phone_num
+                phone: code_data.phone_num,
+                phone_list,
             })  // update the phone and phone list
         })
         
@@ -132,7 +134,8 @@ export const verifyCode = async (req: Request, res: Response, next: NextFunction
         res.clearCookie('c_id');
 
         res.status(200).send({
-            phone_number: code_data.phone_num
+            phone: code_data.phone_num,
+            phone_list,
         });
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to verify sms code'});
