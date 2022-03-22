@@ -16,6 +16,11 @@ auth.post('/message/verify', checkFirebaseToken, messageController.verifyCode);
 // CUSTOMER
 auth.post('/customer/phone', checkFirebaseToken, messageController.setDefaultPhoneNum);
 
+auth.delete('/customer/phone', checkFirebaseToken,  messageController.deletePhoneNum);
+
+auth.patch('/customer/name', checkFirebaseToken, messageController.updateCustomerName);
+
+
 
 
 export default auth

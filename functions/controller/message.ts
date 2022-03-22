@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import axios from 'axios';
 import validator from 'validator'
 import { logger } from '../utils/logger'
@@ -7,7 +7,6 @@ import admin from 'firebase-admin'
 import { minutesToMilliseconds } from "date-fns";
 import { addMinutesToTimestamp, hasExpire } from "../utils/time";
 import { isEmpty, isEqual } from "lodash";
-import { user } from "firebase-functions/v1/auth";
 
 interface ICodeData {
     expiration: number,
@@ -31,22 +30,10 @@ const checkForValidPhoneNumber = (phone: string) => {
     }
 }
 
-export const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
+export const sendMessage = async (req: Request, res: Response) => {
     try {
-        // CHECK IF THE PHONE NUMBER IS PROVIDED
-        if(!req.body.phone_number){
-            return res.status(400).send({ error: 'Phone number must be provided'});
-        }
-        // CHECK IF THE PHONE NUMBER IS STRING
-        if(typeof req.body.phone_number !== 'string'){
-            return res.status(400).send({ error: 'Please double check the phone number data type'});
-        }
-
+        checkForValidPhoneNumber(req.body.phone);
         let phone_num: string = req.body.phone_number;
-        // CHECK IF THE PHONE NUMBER IS A VALID US PHONE NUMBER
-        if(!validator.isMobilePhone(phone_num, "en-US")){
-            return res.status(400).send({ error: 'Not a valid US phone number'})
-        }
 
         let code = Math.floor(Math.random() * 899999 + 100000); // generate 6 digit code
         let c_id = v4();
@@ -73,7 +60,7 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
             c_id, 
             code,
             expiration: addMinutesToTimestamp(15),
-            phone_num: phone_num,
+            phone_num,
         })
 
         res.cookie('c_id', c_id, {
@@ -95,7 +82,7 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
     }
 }
 
-export const verifyCode = async (req: Request, res: Response, next: NextFunction) => {
+export const verifyCode = async (req: Request, res: Response) => {
     try {
         // check for the cookie, required to check for the code in the backend
         if(!req.cookies.c_id){
@@ -158,15 +145,9 @@ export const verifyCode = async (req: Request, res: Response, next: NextFunction
     }
 }
 
-export const setDefaultPhoneNum = async (req: Request, res: Response, next: NextFunction) => {
+export const setDefaultPhoneNum = async (req: Request, res: Response) => {
     try {
-        if(!req.body.phone){
-            throw new Error('No phone number is provided')
-        }
-
-        if(!validator.isMobilePhone(req.body.phone, "en-US")){
-            throw new Error('Not a valid US phone number')
-        }
+        checkForValidPhoneNumber(req.body.phone)
 
         const user_ref = admin.firestore().collection('usersTest').doc(req.user.uid);
         user_ref.update({
@@ -179,7 +160,7 @@ export const setDefaultPhoneNum = async (req: Request, res: Response, next: Next
     }
 }
 
-export const deletePhoneNum = async (req: Request, res: Response, next: NextFunction) => {
+export const deletePhoneNum = async (req: Request, res: Response) => {
     try {
         checkForValidPhoneNumber(req.body.phone);
 
@@ -202,5 +183,22 @@ export const deletePhoneNum = async (req: Request, res: Response, next: NextFunc
         res.status(200).send();
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Fail to delete phone number'})
+    }
+}
+
+export const updateCustomerName = async (req: Request, res: Response) => {
+    try {
+        console.log('this is ran')
+        if(!req.body.name){
+            throw new Error('No name is provided');
+        }
+
+        await admin.firestore().collection('/usersTest').doc(req.user.uid).update({
+            name: req.body.name
+        })
+
+        res.status(200).send();
+    } catch (error) {
+        res.status(400).send({ error: (error as Error).message ?? 'Failed to update name'})
     }
 }
