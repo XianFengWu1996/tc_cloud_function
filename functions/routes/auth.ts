@@ -13,6 +13,9 @@ auth.post('/message/send', checkFirebaseToken, messageController.sendMessage);
 
 auth.post('/message/verify', checkFirebaseToken, messageController.verifyCode);
 
+// CUSTOMER
+auth.post('/customer/phone', checkFirebaseToken, messageController.setDefaultPhoneNum);
+
 
 
 export default auth

@@ -141,3 +141,24 @@ export const verifyCode = async (req: Request, res: Response, next: NextFunction
         res.status(400).send({ error: (error as Error).message ?? 'Failed to verify sms code'});
     }
 }
+
+export const setDefaultPhoneNum = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if(!req.body.phone){
+            throw new Error('No phone number is provided')
+        }
+
+        if(!validator.isMobilePhone(req.body.phone, "en-US")){
+            throw new Error('Not a valid US phone number')
+        }
+
+        const user_ref = admin.firestore().collection('usersTest').doc(req.user.uid);
+        user_ref.update({
+            phone: req.body.phone
+        })
+
+        res.status(200).send();
+    } catch (error) {
+        res.status(400).send({ error: (error as Error).message ?? 'Failed to set default phone number'})
+    }
+}
