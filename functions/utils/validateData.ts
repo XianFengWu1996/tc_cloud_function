@@ -1,3 +1,5 @@
+import validator from 'validator'
+
 export const checkForValidDishData = (data: any) => {
     let valid_en_name = data.en_name === undefined || typeof data.en_name === 'string'
     let valid_ch_name = data.ch_name === undefined || typeof data.ch_name === 'string'
@@ -15,4 +17,19 @@ export const checkForValidDishData = (data: any) => {
     return valid_en_name && valid_ch_name && valid_is_spicy && valid_is_popular 
         && valid_is_lunch && valid_in_stock && valid_price && valid_description 
         && valid_label_id && valid_order && valid_pic_url && valid_variant;
+}
+
+export const checkForValidPhoneNumber = (phone: string) => {
+    // CHECK IF THE PHONE NUMBER IS PROVIDED
+    if(!phone){
+        throw new Error('Phone number must be provided');
+    }
+    // CHECK IF THE PHONE NUMBER IS STRING
+    if(typeof phone !== 'string'){
+        throw new Error('Please double check the phone number data type');
+    }
+    // CHECK IF THE PHONE NUMBER IS A VALID US PHONE NUMBER
+    if(!validator.isMobilePhone(phone, "en-US")){
+        throw new Error('Not a valid US phone number');
+    }
 }

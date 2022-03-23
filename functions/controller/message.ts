@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import axios from 'axios';
-import validator from 'validator'
 import { logger } from '../utils/logger'
 import { v4 } from 'uuid' 
-import admin from 'firebase-admin'
+import { firestore } from 'firebase-admin'
 import { minutesToMilliseconds } from "date-fns";
 import { addMinutesToTimestamp, hasExpire } from "../utils/time";
 import { isEmpty, isEqual } from "lodash";
+import { checkForValidPhoneNumber } from "../utils/validateData";
 
 interface ICodeData {
     expiration: number,
@@ -15,25 +15,11 @@ interface ICodeData {
     phone_num: string,
 }
 
-const checkForValidPhoneNumber = (phone: string) => {
-    // CHECK IF THE PHONE NUMBER IS PROVIDED
-    if(!phone){
-        throw new Error('Phone number must be provided');
-    }
-    // CHECK IF THE PHONE NUMBER IS STRING
-    if(typeof phone !== 'string'){
-        throw new Error('Please double check the phone number data type');
-    }
-    // CHECK IF THE PHONE NUMBER IS A VALID US PHONE NUMBER
-    if(!validator.isMobilePhone(phone, "en-US")){
-        throw new Error('Not a valid US phone number');
-    }
-}
-
 export const sendMessage = async (req: Request, res: Response) => {
     try {
         checkForValidPhoneNumber(req.body.phone);
-        let phone_num: string = req.body.phone_number;
+
+        let phone_num: string = req.body.phone;
 
         let code = Math.floor(Math.random() * 899999 + 100000); // generate 6 digit code
         let c_id = v4();
@@ -54,9 +40,9 @@ export const sendMessage = async (req: Request, res: Response) => {
 
         setTimeout(() => {
             console.log(`${code} has been sent`);
-        }, 2000)
+        }, 2000) // remove it later, just easy to see the code sent
         
-        await admin.firestore().collection('/sms_verification').doc(c_id).set({
+        await firestore().collection('/sms_verification').doc(c_id).set({
             c_id, 
             code,
             expiration: addMinutesToTimestamp(15),
@@ -97,7 +83,7 @@ export const verifyCode = async (req: Request, res: Response) => {
         let code: string | number = req.body.code;
 
         // get the code data from the database
-        let code_data = (await admin.firestore().collection('/sms_verification').doc(c_id).get()).data() as ICodeData;
+        let code_data = (await firestore().collection('/sms_verification').doc(c_id).get()).data() as ICodeData;
 
         // check if the code data exist 
         if(!code_data || isEmpty(code_data)){
@@ -115,9 +101,9 @@ export const verifyCode = async (req: Request, res: Response) => {
 
         let phone_list: string[] = [];
 
-        await admin.firestore().runTransaction(async (transaction) => {
-            const sms_ref = admin.firestore().collection('/sms_verification').doc(c_id);
-            const user_ref = admin.firestore().collection('/usersTest').doc(req.user.uid);
+        await firestore().runTransaction(async (transaction) => {
+            const sms_ref = firestore().collection('/sms_verification').doc(c_id);
+            const user_ref = firestore().collection('/usersTest').doc(req.user.uid);
 
             // update the user phone data in firestore
             const user_data = (await transaction.get(user_ref)).data();
@@ -145,60 +131,3 @@ export const verifyCode = async (req: Request, res: Response) => {
     }
 }
 
-export const setDefaultPhoneNum = async (req: Request, res: Response) => {
-    try {
-        checkForValidPhoneNumber(req.body.phone)
-
-        const user_ref = admin.firestore().collection('usersTest').doc(req.user.uid);
-        user_ref.update({
-            phone: req.body.phone
-        })
-
-        res.status(200).send();
-    } catch (error) {
-        res.status(400).send({ error: (error as Error).message ?? 'Failed to set default phone number'})
-    }
-}
-
-export const deletePhoneNum = async (req: Request, res: Response) => {
-    try {
-        checkForValidPhoneNumber(req.body.phone);
-
-        let user_ref = admin.firestore().collection('/usersTest').doc(req.user.uid);
-
-        let phone_list: string[] = []
-
-        await admin.firestore().runTransaction(async (transaction) => {
-            let user_data = (await transaction.get(user_ref)).data();
-
-            phone_list = user_data?.phone_list;
-
-            let new_phone_list = phone_list.filter((phone) => {
-                return phone !== req.body.phone
-            })
-
-            transaction.update(user_ref, { phone_list:  new_phone_list });
-        })
-
-        res.status(200).send();
-    } catch (error) {
-        res.status(400).send({ error: (error as Error).message ?? 'Fail to delete phone number'})
-    }
-}
-
-export const updateCustomerName = async (req: Request, res: Response) => {
-    try {
-        console.log('this is ran')
-        if(!req.body.name){
-            throw new Error('No name is provided');
-        }
-
-        await admin.firestore().collection('/usersTest').doc(req.user.uid).update({
-            name: req.body.name
-        })
-
-        res.status(200).send();
-    } catch (error) {
-        res.status(400).send({ error: (error as Error).message ?? 'Failed to update name'})
-    }
-}
