@@ -19,6 +19,10 @@ export const setDefaultPhoneNum = async (req: Request, res: Response) => {
 
 export const deletePhoneNum = async (req: Request, res: Response) => {
     try {
+        if(!req.body.phone){
+            throw new Error('No phone numnber is provided')
+        }
+
         let user_ref = firestore().collection('/usersTest').doc(req.user.uid);
 
         let phone_list: string[] = []
