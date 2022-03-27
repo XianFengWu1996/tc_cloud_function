@@ -21,6 +21,8 @@ auth.delete('/customer/phone', checkFirebaseToken,  customerController.deletePho
 
 auth.patch('/customer/name', checkFirebaseToken, customerController.updateCustomerName);
 
+// ADDRESS
+auth.post('/address/delivery', checkFirebaseToken, customerController.calculateDelivery)
 
 
 
