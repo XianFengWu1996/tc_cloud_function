@@ -15,6 +15,8 @@ auth.post('/message/send', checkFirebaseToken, messageController.sendMessage);
 auth.post('/message/verify', checkFirebaseToken, messageController.verifyCode);
 
 // CUSTOMER
+auth.get('/customer', checkFirebaseToken, customerController.getCustomerInfo);
+
 auth.post('/customer/phone', checkFirebaseToken, customerController.setDefaultPhoneNum);
 
 auth.delete('/customer/phone', checkFirebaseToken,  customerController.deletePhoneNum);

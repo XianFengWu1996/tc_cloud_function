@@ -3,6 +3,26 @@ import { checkForValidAddress, checkForValidPhoneNumber } from '../utils/validat
 import { firestore } from 'firebase-admin'
 import axios from "axios";
 
+export const getCustomerInfo = async (req: Request, res: Response) => {
+    try {
+        // fetch the data from firestore
+        let result = (await firestore().collection('/usersTest').doc(req.user.uid).get()).data();
+
+        // handle if not result found
+        if(!result){
+            throw new Error('Not found')
+        }
+
+        // remove private fields
+        delete result.billings
+        delete result.address.place_id
+        delete result.reward.transactions
+        res.status(200).send(result);
+    } catch (error) {
+        res.status(400).send();
+    }
+}
+
 export const setDefaultPhoneNum = async (req: Request, res: Response) => {
     try {
         checkForValidPhoneNumber(req.body.phone)
@@ -64,7 +84,6 @@ export const updateCustomerName = async (req: Request, res: Response) => {
 
 export const calculateDelivery = async (req: Request, res: Response) => {
     try {
-        console.log(req.body);
         checkForValidAddress(req.body) // validate all the fields, nothing happen if all case success
 
         const { format_address, place_id, address } = req.body;
