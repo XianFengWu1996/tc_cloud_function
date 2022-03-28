@@ -59,12 +59,12 @@ export const sendMessage = async (req: Request, res: Response) => {
             // if axios request has failed 
             // only one request here, send a general message to notify th user
             logger.error(error.response?.data);
-            return res.status(400).send({ error: 'Failed to send the message'})
+            return res.status(400).send({ error: 'ERR: Failed to send the message'})
         }
         // let err = (error as AxiosError)
         // console.log(err.response?.data);
         logger.error((error as Error).message);
-        res.status(400).send({ error: 'Unable to complete the request'});
+        res.status(400).send({ error: 'ERR: Unable to complete the request'});
     }
 }
 
@@ -72,11 +72,11 @@ export const verifyCode = async (req: Request, res: Response) => {
     try {
         // check for the cookie, required to check for the code in the backend
         if(!req.cookies.c_id){
-            return res.status(401).send({ error: 'Not Authorize'});
+            return res.status(401).send({ error: 'ERR: Not Authorize'});
         }
 
         if(!req.body.code){
-            throw new Error('No code was provided')
+            throw new Error('ERR: No code was provided')
         }
 
         let c_id: string = req.cookies.c_id;
@@ -87,16 +87,16 @@ export const verifyCode = async (req: Request, res: Response) => {
 
         // check if the code data exist 
         if(!code_data || isEmpty(code_data)){
-            throw new Error('Code has either expire or not found')
+            throw new Error('ERR: Code has either expire or not found')
         }   
         // check if the code data has expire or not
         if(hasExpire(code_data.expiration)){
-            throw new Error('The code has expired')
+            throw new Error('ERR: The code has expired')
         }
 
         // compare the codes        
         if(!isEqual(code_data.code.toString(), code.toString())){
-            throw new Error('The code does not match');
+            throw new Error('ERR: The code does not match');
         }
 
         let phone_list: string[] = [];
@@ -127,7 +127,7 @@ export const verifyCode = async (req: Request, res: Response) => {
             phone_list,
         });
     } catch (error) {
-        res.status(400).send({ error: (error as Error).message ?? 'Failed to verify sms code'});
+        res.status(400).send({ error: (error as Error).message ?? 'ERR: Failed to verify sms code'});
     }
 }
 

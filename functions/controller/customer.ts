@@ -19,7 +19,7 @@ export const getCustomerInfo = async (req: Request, res: Response) => {
         delete result.reward.transactions
         res.status(200).send(result);
     } catch (error) {
-        res.status(400).send();
+        res.status(400).send({ error: 'ERR: Failed to retrieve user data'});
     }
 }
 
@@ -27,21 +27,21 @@ export const setDefaultPhoneNum = async (req: Request, res: Response) => {
     try {
         checkForValidPhoneNumber(req.body.phone)
 
-        const user_ref = firestore().collection('usersTest').doc(req.user.uid);
+        const user_ref = firestore().collection('/usersTest').doc(req.user.uid);
         user_ref.update({
             phone: req.body.phone
         })
 
         res.status(200).send();
     } catch (error) {
-        res.status(400).send({ error: (error as Error).message ?? 'Failed to set default phone number'})
+        res.status(400).send({ error: (error as Error).message ?? 'ERR: Failed to set default phone number'})
     }
 }
 
 export const deletePhoneNum = async (req: Request, res: Response) => {
     try {
         if(!req.body.phone){
-            throw new Error('No phone numnber is provided')
+            throw new Error('ERR: No phone numnber is provided')
         }
 
         let user_ref = firestore().collection('/usersTest').doc(req.user.uid);
@@ -62,14 +62,14 @@ export const deletePhoneNum = async (req: Request, res: Response) => {
 
         res.status(200).send();
     } catch (error) {
-        res.status(400).send({ error: (error as Error).message ?? 'Fail to delete phone number'})
+        res.status(400).send({ error: 'ERR: Fail to delete phone number'})
     }
 }
 
 export const updateCustomerName = async (req: Request, res: Response) => {
     try {
         if(!req.body.name){
-            throw new Error('No name is provided');
+            throw new Error('ERR: No name is provided');
         }
 
         await firestore().collection('/usersTest').doc(req.user.uid).update({
@@ -78,7 +78,7 @@ export const updateCustomerName = async (req: Request, res: Response) => {
 
         res.status(200).send();
     } catch (error) {
-        res.status(400).send({ error: (error as Error).message ?? 'Failed to update name'})
+        res.status(400).send({ error: 'ERR: Failed to update name'})
     }
 }
 
@@ -96,7 +96,7 @@ export const calculateDelivery = async (req: Request, res: Response) => {
             params: {
                 origins: `place_id:${origin_place_id}`,
                 destinations: `place_id:${place_id}`,
-                key: 'AIzaSyC7trHPRFicOYB05m_Ys6AaybOGTnpJqFc'
+                key: process.env.MAP_KEY,
             }
         })
 
@@ -114,10 +114,10 @@ export const calculateDelivery = async (req: Request, res: Response) => {
         } else if (miles >= 1.8 && miles <=5.8){
             delivery_fee = Math.round(miles);
         } else {
-            throw new Error('Too far');
+            throw new Error('ERR: Out of the delivery boundary');
         }
 
-        firestore().collection('/usersTest').doc(req.user.uid).update({
+        await firestore().collection('/usersTest').doc(req.user.uid).update({
             address: {
                 address: format_address,
                 ...address,
@@ -134,7 +134,10 @@ export const calculateDelivery = async (req: Request, res: Response) => {
             } 
         })
     } catch (error) {
-        console.log(error);
-        res.status(400).send({ error: (error as Error).message ?? 'Failed to set address'})
+        if(axios.isAxiosError(error)){
+            return res.status(400).send({ error: 'ERR: Failed to calculate delivery fee'})
+        }
+
+        res.status(400).send({ error: (error as Error).message ?? 'ERR: Failed to set address'})
     }
 }

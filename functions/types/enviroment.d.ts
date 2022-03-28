@@ -10,6 +10,7 @@ declare global {
         SPECIAL_MENUID: string,
         SPECIAL_CATEGORYID: string,
         SMS_KEY: string,
+        MAP_KEY: string,
       }
     }
   }
