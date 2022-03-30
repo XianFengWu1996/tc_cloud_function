@@ -6,6 +6,7 @@ import * as functions from "firebase-functions";
 import store from '../routes/store'
 import admin from '../routes/admin';
 import auth from '../routes/auth';
+import payment from '../routes/payment';
 import { middleware } from './config/base';
 
 
@@ -27,9 +28,14 @@ const auth_app = express();
 middleware(auth_app);
 auth_app.use('/', auth);
 
+const payment_app = express();
+middleware(payment_app)
+payment_app.use('/', payment)
+
 exports.admin = functions.region('us-east4').https.onRequest(admin_app);
 exports.store = functions.region('us-east4').https.onRequest(store_app);
 exports.auth = functions.region('us-east4').https.onRequest(auth_app);
+exports.payment = functions.region('us-east4').https.onRequest(payment_app);
 
   
 

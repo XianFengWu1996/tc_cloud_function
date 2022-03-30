@@ -1,16 +1,22 @@
 import { NextFunction, Request, Response } from 'express'
 import admin from 'firebase-admin'
-import { isEmpty } from 'lodash';
+import { isEmpty} from 'lodash';
+import Stripe from 'stripe';
+
+
+const stripe = new Stripe('sk_test_zXSjQbIUWTqONah6drD5oFvC00islas5P7', {
+    apiVersion: '2020-08-27',
+});
 
 export const Signin = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // sync old data to the new doc
         await admin.firestore().runTransaction(async (transaction) => {
             const user_ref = admin.firestore().collection('/usersTest').doc(req.user.uid);
-            let user_data = transaction.get(user_ref);
+            let user_data = (await transaction.get(user_ref)).data();
 
             // if the user doc (new doc) does not exist
-            if(isEmpty((await user_data).data)){
+            if(isEmpty(user_data)){
                 let old_user = (await transaction.get(user_ref.collection('customer').doc('details'))).data();
                 let old_reward = (await transaction.get(user_ref.collection('rewards').doc('points'))).data();
 
@@ -39,10 +45,23 @@ export const Signin = async (req: Request, res: Response, next: NextFunction) =>
                     },
                 })       
             }
+
+            let customer;
+            // create a customer with Stripe
+            if(user_data && !user_data.billings.stripe_customer_id){
+                customer = await stripe.customers.create({
+                    email:req.user.email
+                });
+
+                transaction.update(user_ref, {
+                    'billings.stripe_customer_id': customer.id
+                })
+            }
         })
 
         res.status(200).send();
     } catch (error) {
+        console.log(error);
         res.status(400).send({ error: 'ERR: Failed to login'});
     }
 }

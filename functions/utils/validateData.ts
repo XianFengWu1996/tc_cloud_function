@@ -1,4 +1,4 @@
-import { isNumber, isString } from 'lodash'
+import { isString } from 'lodash'
 import validator from 'validator'
 
 export const checkForValidDishData = (data: any) => {
