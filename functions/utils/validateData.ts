@@ -1,4 +1,4 @@
-import { isString } from 'lodash'
+import { isBoolean, isEmpty, isNumber, isString } from 'lodash'
 import validator from 'validator'
 
 export const checkForValidDishData = (data: any) => {
@@ -21,14 +21,11 @@ export const checkForValidDishData = (data: any) => {
 }
 
 export const checkForValidPhoneNumber = (phone: string) => {
-    // CHECK IF THE PHONE NUMBER IS PROVIDED
-    if(!phone){
-        throw new Error('Phone number must be provided');
+    // CHECK IF THE PHONE NUMBER IS PROVIDED AND IS STRING
+    if(!isString(phone)){
+        throw new Error('Missing phone number or wrong type');
     }
-    // CHECK IF THE PHONE NUMBER IS STRING
-    if(typeof phone !== 'string'){
-        throw new Error('Please double check the phone number data type');
-    }
+
     // CHECK IF THE PHONE NUMBER IS A VALID US PHONE NUMBER
     if(!validator.isMobilePhone(phone, "en-US")){
         throw new Error('Not a valid US phone number');
@@ -37,44 +34,101 @@ export const checkForValidPhoneNumber = (phone: string) => {
 
 export const checkForValidAddress = (data: any) => {
       // check for require fields
-      if(!data.format_address ){
+    if(!isString(data.format_address)){
         throw new Error('Missing format address or wrong type')
     }
-
-    if(!isString(data.format_address)){
-        throw new Error('format_address must be a string')
-    }
-
-    if(!data.place_id){
-        throw new Error('Missing place_id')
-    }
-
     if(!isString(data.place_id)){
-        throw new Error('Place_id must be number')
+        throw new Error('Missing place_id or wrong type')
     }
     let addr = data.address;
 
-    if(!addr){
+    if(isEmpty(addr)){
         throw new Error('Missing required address field')
     }
 
-    if(!addr.street || !addr.city || !addr.state || !addr.zipcode){
-        throw new Error('Missing one or more required address data')
-    }
-
     if(!isString(addr.street)){
-        throw new Error('Street must be a string')
+        throw new Error('Missing street or wrong type')
     }
 
     if(!isString(addr.city)){
-        throw new Error('City must be a string')
+        throw new Error('Missing city or wrong type')
     }
 
     if(!isString(addr.state)){
-        throw new Error('State must be a string')
+        throw new Error('Missing state or wrong type')
     }
 
     if(!isString(addr.zipcode)){
-        throw new Error('Zipcode must be a string')
+        throw new Error('Missing zipcode or wrong type')
+    }
+}
+
+export const validateCustomer = (data: ICustomer) => {
+    if(isEmpty(data)){
+        throw new Error('ERR: Missing customer information')
+    }
+
+    if(!isString(data.name)){
+        throw new Error('ERR: Missing customer name or wrong type')
+    }
+    
+    if(!isString(data.phone)){
+        throw new Error('ERR: Missing customer phone number or wrong type');
+    }
+}
+
+export const validateCart = (data: ICart) => {
+    if(isEmpty(data)){
+        throw new Error('ERR: Missing cart information')
+    }
+
+    if(isEmpty(data.cart)){
+        throw new Error('ERR: Cart is empty, please add some items')
+    }
+
+    if(!isNumber(data.cart_quantity)){
+        throw new Error('ERR: Missing cart quantity or wrong type')
+    }
+
+    if(!isBoolean(data.is_delivery)){
+        throw new Error('ERR: Missing is_delivery or wrong type')
+    }
+
+    if(!isNumber(data.subtotal)){
+        throw new Error('ERR: Missing subtotal or wrong type')
+    }
+
+    if(!isNumber(data.delivery_fee)){
+        throw new Error('ERR: Missing delivery fee or wrong type')
+    }
+
+    if(!isNumber(data.tax)){
+        throw new Error('ERR: Missing tax or wrong type')
+    }
+
+    if(!isNumber(data.tip)){
+        throw new Error('ERR: Missing tip or wrong type')
+    }
+
+    if(!isNumber(data.total)){
+        throw new Error('ERR: Missing total or wrong type')
+    }
+
+    if(!isNumber(data.lunch_discount)){
+        throw new Error('ERR: Missing lunch discount or wrong type')
+    }
+
+    if(!isNumber(data.point_redemption)){
+        throw new Error('ERR: Missing point redemption or wrong type')
+    }
+
+    if(!isString(data.payment_type)){
+        throw new Error('ERR: Missing payment type or wrong type')
+    }
+    if(!isString(data.comments)){
+        throw new Error('ERR: Missing comments or wrong type')
+    }
+    if(!isBoolean(data.includeUtensils)){
+        throw new Error('ERR: Missing includeUtensils or wrong type')
     }
 }

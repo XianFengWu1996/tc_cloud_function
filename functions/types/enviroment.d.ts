@@ -11,6 +11,7 @@ declare global {
         SPECIAL_CATEGORYID: string,
         SMS_KEY: string,
         MAP_KEY: string,
+        REWARD_PERCENTAGE: number,
       }
     }
   }
