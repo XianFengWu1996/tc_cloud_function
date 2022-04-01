@@ -55,6 +55,6 @@ declare global {
         type: TransactionType,  // 'reward', 
         amount: number,
         order_id: string, 
-        createdAt: number,
+        created_at: number,
     }
 }

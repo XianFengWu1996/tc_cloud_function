@@ -9,4 +9,6 @@ payment.post("/create-payment-intent", checkFirebaseToken, paymentController.cre
 
 payment.post("/confirm", checkFirebaseToken, paymentController.confirmPaymentIntent);
 
+payment.post("/place_order", checkFirebaseToken, paymentController.placeOrder)
+
 export default payment;
