@@ -1,12 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import admin from 'firebase-admin'
 import { isEmpty} from 'lodash';
-import Stripe from 'stripe';
-
-
-const stripe = new Stripe('sk_test_zXSjQbIUWTqONah6drD5oFvC00islas5P7', {
-    apiVersion: '2020-08-27',
-});
+import { createStripeCustomer } from '../utils/payment';
 
 export const Signin = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -46,17 +41,12 @@ export const Signin = async (req: Request, res: Response, next: NextFunction) =>
                 })       
             }
 
-            let customer;
-            // create a customer with Stripe
-            if(user_data && !user_data.billings.stripe_customer_id){
-                customer = await stripe.customers.create({
-                    email:req.user.email
-                });
-
-                transaction.update(user_ref, {
-                    'billings.stripe_customer_id': customer.id
-                })
-            }
+            createStripeCustomer({
+                email: req.user.email ?? '',
+                uid: req.user.uid,
+                transaction,
+                type: 'transaction'
+            })
         })
 
         res.status(200).send();

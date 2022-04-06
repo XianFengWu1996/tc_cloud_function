@@ -4,8 +4,9 @@ import * as paymentController from '../controller/payment'
 
 const payment = express.Router();
 
-// PAYMENT - WILL BE MOVE TO ITS OWN SECTION LATER
-payment.post("/create-payment-intent", checkFirebaseToken, paymentController.createPaymentIntent);
+payment.post("/update-payment-intent", checkFirebaseToken,paymentController.updatePaymentIntent);
+
+payment.get('/get_payment_method', checkFirebaseToken, paymentController.getSavedPaymentList)
 
 payment.post("/confirm", checkFirebaseToken, paymentController.confirmPaymentIntent);
 

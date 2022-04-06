@@ -1,29 +1,5 @@
 import { firestore } from "firebase-admin"
-import { stripe } from "../controller/payment"
-
-export const updatePaymentIntent =  async (s_id:string, total:number) => {
-    if(!s_id){
-        throw new Error('ERR: s_id is not avaiable')
-    }
-
-    if(!total){
-        throw new Error('ERR: total is required ')
-    }
-
-    if(typeof total !== 'number'){
-        throw new Error('ERR: total must be a number')
-    }
-
-    // filter out the payment intent id from the client secret
-    let index = s_id.indexOf('_secret_')
-    let payment_intent_id = s_id.slice(0, index);
-    
-    stripe.paymentIntents.update(payment_intent_id, {
-        amount: Number((total * 100).toFixed(0))
-    })
-
-    return payment_intent_id
-}
+import { stripe } from "../controller/payment";
 
 interface IPlaceOrder {
     order_id: string, 
@@ -115,3 +91,35 @@ export const handlePlaceOrder = async ({ order_id, user_id, cart, customer, paym
         transaction.create(order_ref, order)            
     })
 } 
+
+export const retrieveIntentFromCookie = (secret: string) => {
+    let index = secret.indexOf('_secret_')
+    return secret.slice(0, index);
+}
+
+interface ICreateStripeCustomer {
+    email: string,
+    uid: string,
+    transaction: FirebaseFirestore.Transaction | null,
+    type: 'transaction' | 'collection'
+}
+export const createStripeCustomer = async ({ email, uid, transaction, type} :ICreateStripeCustomer) => {
+    let customer = await stripe.customers.create({
+        email
+    });
+    let user_ref = firestore().collection('usersTest').doc(uid);
+
+    if(type === 'transaction'){
+        transaction?.update(user_ref, {
+            'billings.stripe_customer_id': customer.id
+        })
+    }
+
+    if(type === 'collection'){
+        user_ref.update({ 
+            'billings.stripe_customer_id': customer.id
+        })
+    }
+
+    return customer.id
+}
