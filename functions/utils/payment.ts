@@ -66,8 +66,12 @@ export const handlePlaceOrder = async ({ order_id, user_id, cart, customer, paym
                 subtotal: cart.subtotal,
                 tax: cart.tax,
                 tip: cart.tip,
-                delivery_fee: cart.delivery_fee,
+                delivery_fee: cart.is_delivery ? cart.delivery_fee : 0,
                 total: cart.total,
+                refund: {
+                    amount: 0,
+                    refund_reason: ''
+                }
             },
             delivery: {
                 is_delivery: cart.is_delivery,
