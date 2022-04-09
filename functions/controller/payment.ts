@@ -118,6 +118,7 @@ export const getSavedPaymentList = async ( req: Request, res: Response) => {
                 automatic_payment_methods: {
                     enabled: true,
                 },
+                
             });
             // set the cookie for payment intent
             res.cookie('s_id', paymentIntent.client_secret);
@@ -133,8 +134,6 @@ export const getSavedPaymentList = async ( req: Request, res: Response) => {
 
 export const placeOnlineOrder =  async (req: Request, res: Response) => {
     try {
-      
-
         if(!isString(req.body.payment_intent)){
             throw new Error('ERR: payment intent is required')
         }
@@ -148,6 +147,27 @@ export const placeOnlineOrder =  async (req: Request, res: Response) => {
 
         let payment_intent = req.body.payment_intent
 
+        // 
+        if(req.body.is_new){
+
+            // check if the wallet was successful
+            let intent = await stripe.paymentIntents.retrieve(payment_intent);
+            console.log(intent);
+
+            if(intent.status !== 'succeeded'){
+                console.log(intent.next_action?.type);
+                if(intent.next_action?.type === 'wechat_pay_display_qr_code'){
+                    throw new Error('Wechat payment unsuccessful / cancelled')
+                }
+
+                if(intent.last_payment_error){
+                    
+                }
+
+                throw new Error('Payment was unsuccessful')
+            }
+        }
+
         let customer:ICustomer = req.body.customer;
         let cart:ICart = req.body.cart;
         let order_id = v4();
@@ -156,6 +176,7 @@ export const placeOnlineOrder =  async (req: Request, res: Response) => {
         await handlePlaceOrder({ order_id, user_id: req.user.uid, cart, customer, payment_intent_id: payment_intent });
         
         // //remove the cookie (s_id) after the order completes for new payment
+        console.log(req.body.is_new)
         if(req.body.is_new){
             res.clearCookie('s_id');
         }
