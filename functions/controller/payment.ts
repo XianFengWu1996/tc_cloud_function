@@ -16,7 +16,6 @@ export const updatePaymentIntent  = async(req: Request, res: Response) => {
     try {
         let s_id = req.cookies.s_id;
         let total = req.body.total 
-        let future_use = req.body.future_use;
         
         if(!isString(s_id)){
             throw new Error('ERR: s_id is not avaiable')
@@ -25,32 +24,24 @@ export const updatePaymentIntent  = async(req: Request, res: Response) => {
         if(!isNumber(total)){
             throw new Error('ERR: total is required ')
         }
-
-        if(!isBoolean(future_use)){
-            throw new Error('ERR: future_use is required')
-        }
         
-        let user = (await firestore().collection('usersTest').doc(req.user.uid).get()).data() as ICustomer
-        let customer_id = user.billings.stripe_customer_id;
-        if(!customer_id){
-            customer_id = await createStripeCustomer({
-                email: req.user.email ?? '',
-                uid: req.user.uid,
-                transaction: null,
-                type: 'collection'
-            });
-        }
+        // let user = (await firestore().collection('usersTest').doc(req.user.uid).get()).data() as ICustomer
+        // let customer_id = user.billings.stripe_customer_id;
+
+        // if(!customer_id){
+        //     customer_id = await createStripeCustomer({
+        //         email: req.user.email ?? '',
+        //         uid: req.user.uid,
+        //         transaction: null,
+        //         type: 'collection'
+        //     });
+        // }
 
         // filter out the payment intent id from the client secret
         let payment_intent_id = retrieveIntentFromCookie(s_id);
-        
-        await stripe.paymentIntents.update(payment_intent_id, future_use ? {
-            amount: Number((total * 100).toFixed(0)),
-            customer: customer_id,
-            setup_future_usage: 'on_session'
-        } : {
-            amount: Number((total * 100).toFixed(0)),
-            customer: customer_id,
+
+        await stripe.paymentIntents.update(payment_intent_id, {
+            amount: Number((total * 100).toFixed(0))
         })
     
         res.status(200).send({ payment_intent: payment_intent_id});
@@ -117,8 +108,7 @@ export const getSavedPaymentList = async ( req: Request, res: Response) => {
                 currency: "usd",
                 automatic_payment_methods: {
                     enabled: true,
-                },
-                
+                },    
             });
             // set the cookie for payment intent
             res.cookie('s_id', paymentIntent.client_secret);
@@ -141,32 +131,30 @@ export const placeOnlineOrder =  async (req: Request, res: Response) => {
         if(!isBoolean(req.body.is_new)){
             throw new Error('ERR: is_new is required')
         }
-        // // validate all the data
-        validateCustomer(req.body.customer);
-        validateCart(req.body.cart);
+     
 
         let payment_intent = req.body.payment_intent
 
-        // 
-        if(req.body.is_new){
+        // check if the wallet was successful
+        let intent = await stripe.paymentIntents.retrieve(payment_intent);
+        console.log(intent);
 
-            // check if the wallet was successful
-            let intent = await stripe.paymentIntents.retrieve(payment_intent);
-            console.log(intent);
-
-            if(intent.status !== 'succeeded'){
-                console.log(intent.next_action?.type);
-                if(intent.next_action?.type === 'wechat_pay_display_qr_code'){
-                    throw new Error('Wechat payment unsuccessful / cancelled')
-                }
-
-                if(intent.last_payment_error){
-                    
-                }
-
-                throw new Error('Payment was unsuccessful')
+        if(intent.status !== 'succeeded'){
+            console.log(intent.next_action?.type);
+            if(intent.next_action?.type === 'wechat_pay_display_qr_code'){
+                throw new Error('Wechat payment unsuccessful / cancelled')
             }
+
+            if(intent.last_payment_error){
+                throw new Error(intent.last_payment_error.message)
+            }
+
+            throw new Error('Payment was unsuccessful or cancelled')
         }
+      
+        // validate all the data
+        validateCustomer(req.body.customer);
+        validateCart(req.body.cart);
 
         let customer:ICustomer = req.body.customer;
         let cart:ICart = req.body.cart;
