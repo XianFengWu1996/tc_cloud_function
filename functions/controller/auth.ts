@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import admin from 'firebase-admin'
 import { isEmpty} from 'lodash';
-import { createStripeCustomer } from '../utils/payment';
 
 export const Signin = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -40,13 +39,6 @@ export const Signin = async (req: Request, res: Response, next: NextFunction) =>
                     },
                 })       
             }
-
-            createStripeCustomer({
-                email: req.user.email ?? '',
-                uid: req.user.uid,
-                transaction,
-                type: 'transaction'
-            })
         })
 
         res.status(200).send();

@@ -138,9 +138,9 @@ export const createPaymentIntent = async (req: Request, res: Response, customer_
             customer: customer_id, // associate the all the payment with this customer
             amount: 1000, // this is the minimum for credit card payment, but will be update during submit
             currency: "usd",
-            payment_method_types: [
-                'card', 'wechat_pay'
-            ],
+            automatic_payment_methods: {
+                enabled: true
+            }
         });
         // set the cookie for payment intent
         res.cookie('s_id', paymentIntent.client_secret);

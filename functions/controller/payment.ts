@@ -143,7 +143,7 @@ export const usePaymentMethodId = async (req: Request, res: Response) => {
             throw new Error('ERR: No user found')
         }
 
-        await stripe.paymentIntents.create({
+        let stripe_result = await stripe.paymentIntents.create({
             amount: Number((total * 100).toFixed(0)),
             currency: 'usd',
             customer: user.billings.stripe_customer_id,
@@ -151,7 +151,9 @@ export const usePaymentMethodId = async (req: Request, res: Response) => {
             confirm: true,
         })
 
-        res.send();
+        res.send({
+            payment_intent: stripe_result.id,
+        });
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to process payment with id'})
     }
