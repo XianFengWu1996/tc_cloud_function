@@ -1,4 +1,6 @@
+import { Request, Response } from "express";
 import { firestore } from "firebase-admin"
+import { isEmpty, isString } from "lodash";
 import { stripe } from "../controller/payment";
 
 interface IPlaceOrder {
@@ -96,34 +98,104 @@ export const handlePlaceOrder = async ({ order_id, user_id, cart, customer, paym
     })
 } 
 
+
+
+export const getCustomerId = async (uid: string, email: string | undefined) => {
+    let user_ref = firestore().collection('/usersTest').doc(uid);
+    let user = (await user_ref.get()).data() as ICustomer;
+
+    if(!user){
+        throw new Error('No user found')
+    }
+
+    let customer_id = user.billings.stripe_customer_id;
+
+
+    if(!user.billings.stripe_customer_id){
+        let customer = await stripe.customers.create({
+            email: email ?? '',
+        })
+
+        customer_id = customer.id
+
+        user_ref.update({
+            'billings.stripe_customer_id': customer.id
+        })
+    }
+
+    return customer_id
+}
+
+// STRIPE RELATED
+
+export const createPaymentIntent = async (req: Request, res: Response, customer_id: string) => {
+    // check for s_id in the cookie
+    let s_id = req.cookies.s_id;
+    // if no s_id is found, we will need to generate a new payment intent 
+    if(!isString(s_id) || isEmpty(s_id)){
+        // Create a PaymentIntent with the order amount and currency
+        const paymentIntent = await stripe.paymentIntents.create({
+            customer: customer_id, // associate the all the payment with this customer
+            amount: 1000, // this is the minimum for credit card payment, but will be update during submit
+            currency: "usd",
+            payment_method_types: [
+                'card', 'wechat_pay'
+            ],
+        });
+        // set the cookie for payment intent
+        res.cookie('s_id', paymentIntent.client_secret);
+    }
+}
+
 export const retrieveIntentFromCookie = (secret: string) => {
     let index = secret.indexOf('_secret_')
     return secret.slice(0, index);
 }
 
-interface ICreateStripeCustomer {
-    email: string,
-    uid: string,
-    transaction: FirebaseFirestore.Transaction | null,
-    type: 'transaction' | 'collection'
+export const generatePublicPaymentList = async (customer_id: string) => {
+      // retrieve the payment method list from stripe for the customer
+      const paymentMethods = await stripe.paymentMethods.list({
+        customer: customer_id,
+        type: 'card'
+    })
+
+    // loop through the list and generate a list of new public view payment method
+    let publicPaymentMethods: IPublicPaymentMethod[] = [];
+    paymentMethods.data.map((val) => {
+        if(!val.card){
+            throw new Error('Failed to list payment, some card information not found')
+        }
+        publicPaymentMethods.unshift({
+            card: {
+                brand: val.card.brand,
+                exp_month: val.card.exp_month,
+                exp_year: val.card.exp_year,
+                last_four: val.card.last4
+            },
+            id: val.id
+        })
+    })
+
+    return publicPaymentMethods
 }
-export const createStripeCustomer = async ({ email, uid, transaction, type} :ICreateStripeCustomer) => {
-    let customer = await stripe.customers.create({
-        email
-    });
-    let user_ref = firestore().collection('usersTest').doc(uid);
 
-    if(type === 'transaction'){
-        transaction?.update(user_ref, {
-            'billings.stripe_customer_id': customer.id
-        })
+export const validateIntentStatus = async (payment_intent: string) => {
+    if(!isString(payment_intent)){
+        throw new Error('ERR: payment intent is required')
+    }
+ 
+    // check if the wallet was successful
+    let intent = await stripe.paymentIntents.retrieve(payment_intent);
+    
+    if(intent.next_action?.type === 'wechat_pay_display_qr_code'){
+        throw new Error('Wechat payment unsuccessful / cancelled')
     }
 
-    if(type === 'collection'){
-        user_ref.update({ 
-            'billings.stripe_customer_id': customer.id
-        })
+    if(intent.last_payment_error){
+        throw new Error(intent.last_payment_error.message)
     }
 
-    return customer.id
+    if(intent.status !== 'succeeded'){
+        throw new Error('Payment was not successful or cancelled')
+    }
 }

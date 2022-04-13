@@ -11,7 +11,6 @@ payment.get('/get_payment_method', checkFirebaseToken, paymentController.getSave
 
 payment.post('/payment_method_id', checkFirebaseToken, paymentController.usePaymentMethodId)
 
-
 // order 
 payment.post("/place_online_order", checkFirebaseToken, paymentController.placeOnlineOrder);
 
