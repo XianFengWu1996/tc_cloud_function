@@ -1,8 +1,11 @@
+import { DateTime } from 'luxon'
+
+export const date = DateTime.now().setZone("America/New_York");
 
 export const addMinutesToTimestamp = (minute: number) => {
-    return Date.now() + (minute * 60 * 1000)
+    return date.plus({ minute }).toUnixInteger()
 }
 
 export const hasExpire = (time: number) => {
-    return Date.now() >= time;
+    return date.toUnixInteger() >= time;
 }

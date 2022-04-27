@@ -5,12 +5,13 @@ import { createPaymentIntent, generatePublicPaymentList, getCustomerId, handlePl
 import { v4 } from "uuid";
 import { firestore } from "firebase-admin";
 import { isBoolean, isNumber, isString } from "lodash";
-import { format } from 'date-fns'
+import { date } from '../utils/time'
 
 
 export const stripe = new Stripe('sk_test_zXSjQbIUWTqONah6drD5oFvC00islas5P7', {
     apiVersion: '2020-08-27',
 });
+
 
 // get the list of the saved payment list and create an intent if there isnt one
 export const getSavedPaymentList = async ( req: Request, res: Response) => {
@@ -97,9 +98,10 @@ export const placeOnlineOrder =  async (req: Request, res: Response) => {
 
         res.send({ 
             order_id,  
-            order_time: format(new Date(), 'MMM dd, yyyy HH:mm'), 
+            order_time: date.toFormat('DDD T'), 
             item_count: cart.cart_quantity,
-            estimate: cart.is_delivery ? 45 : 15 // for now
+            estimate: cart.is_delivery ? 45 : 15, // for now
+            total: cart.total
         })
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to submit order' })
@@ -109,6 +111,7 @@ export const placeOnlineOrder =  async (req: Request, res: Response) => {
 export const placeCashOrder = async (req: Request, res: Response) => {
     try {
         console.log('cash order')
+        console.log(date)
 
          // validate all the data
          validateCustomer(req.body.customer);
@@ -123,9 +126,10 @@ export const placeCashOrder = async (req: Request, res: Response) => {
 
         res.send({ 
             order_id,  
-            order_time: format(new Date(), 'MMM dd, yyyy HH:mm'), 
+            order_time: date.toFormat('DDD T'), 
             item_count: cart.cart_quantity,
-            estimate: cart.is_delivery ? 45 : 15 // for now
+            estimate: cart.is_delivery ? 45 : 15, // for now
+            total: cart.total
         })
     } catch (error) {
         console.log(error)
@@ -169,3 +173,5 @@ export const usePaymentMethodId = async (req: Request, res: Response) => {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to process payment with id'})
     }
 }
+
+

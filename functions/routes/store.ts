@@ -3,6 +3,7 @@ import { body } from 'express-validator';
 import * as storeController from '../controller/store';
 import {  checkTokenInCookie } from '../middleware/auth';
 import { filesUpload } from '../middleware/upload'
+import { date } from '../utils/time';
 
 const store = express.Router();
 
@@ -26,4 +27,14 @@ store.patch('/menus/:dishId',checkTokenInCookie, storeController.updateMenu);
 store.post('/menus/image/upload', checkTokenInCookie, filesUpload, storeController.uploadImage)
 
 
+store.get('/test', async(req, res) => {
+
+
+    let new_date = date.plus({ minute: 30}).toUnixInteger()
+
+    res.send({
+        date: date.toUnixInteger(), 
+        new_date
+    })
+})
 export default store;

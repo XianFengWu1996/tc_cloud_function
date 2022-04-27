@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
-import { addMinutes, getTime } from 'date-fns';
 import { validationResult } from "express-validator";
 import admin, { firestore } from "firebase-admin";
 import { checkForAdminStatus } from "./admin";
 import { createPersistentDownloadUrl } from '../utils/url'
 import { checkForValidDishData } from '../utils/validateData'
 import { v4 } from 'uuid'
-import { addMinutesToTimestamp } from "../utils/time";
+import { addMinutesToTimestamp, date } from "../utils/time";
+
 
 export const getPublicInfo = async (req: Request, res: Response, next:NextFunction) => {
     try {
@@ -18,7 +18,7 @@ export const getPublicInfo = async (req: Request, res: Response, next:NextFuncti
             special_hour: data.special_hour,
             message: data.message,
             server_is_on: data.server_is_on,
-            expiration: getTime(addMinutes(Date.now(), 30)),
+            expiration: addMinutesToTimestamp(30)
         }); 
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to get store info' });

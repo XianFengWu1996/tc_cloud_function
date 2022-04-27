@@ -3,7 +3,6 @@ import axios from 'axios';
 import { logger } from '../utils/logger'
 import { v4 } from 'uuid' 
 import { firestore } from 'firebase-admin'
-import { minutesToMilliseconds } from "date-fns";
 import { addMinutesToTimestamp, hasExpire } from "../utils/time";
 import { isEmpty, isEqual } from "lodash";
 import { checkForValidPhoneNumber } from "../utils/validateData";
@@ -50,7 +49,7 @@ export const sendMessage = async (req: Request, res: Response) => {
         })
 
         res.cookie('c_id', c_id, {
-            maxAge: minutesToMilliseconds(15),
+            maxAge: 15 * 60 * 1000,
         })
 
         res.status(200).send();
