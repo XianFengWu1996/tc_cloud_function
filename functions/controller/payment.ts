@@ -5,6 +5,7 @@ import { createPaymentIntent, generatePublicPaymentList, getCustomerId, handlePl
 import { v4 } from "uuid";
 import { firestore } from "firebase-admin";
 import { isBoolean, isNumber, isString } from "lodash";
+import { format } from 'date-fns'
 
 
 export const stripe = new Stripe('sk_test_zXSjQbIUWTqONah6drD5oFvC00islas5P7', {
@@ -94,7 +95,12 @@ export const placeOnlineOrder =  async (req: Request, res: Response) => {
             res.clearCookie('s_id');
         }
 
-        res.send({ order_id })
+        res.send({ 
+            order_id,  
+            order_time: format(new Date(), 'MMM dd, yyyy HH:mm'), 
+            item_count: cart.cart_quantity,
+            estimate: cart.is_delivery ? 45 : 15 // for now
+        })
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to submit order' })
     }
@@ -115,7 +121,12 @@ export const placeCashOrder = async (req: Request, res: Response) => {
         // place the order to firestore
         await handlePlaceOrder({ order_id, user_id: req.user.uid, cart, customer, payment_intent_id: '' });
 
-        res.send({ order_id })
+        res.send({ 
+            order_id,  
+            order_time: format(new Date(), 'MMM dd, yyyy HH:mm'), 
+            item_count: cart.cart_quantity,
+            estimate: cart.is_delivery ? 45 : 15 // for now
+        })
     } catch (error) {
         console.log(error)
         res.status(400).send({ error: (error as Error).message ?? 'Failed to submit order' })
