@@ -5,7 +5,7 @@ import { checkForAdminStatus } from "./admin";
 import { createPersistentDownloadUrl } from '../utils/url'
 import { checkForValidDishData } from '../utils/validateData'
 import { v4 } from 'uuid'
-import { addMinutesToTimestamp, date } from "../utils/time";
+import { addMinutesToTimestamp } from "../utils/time";
 
 
 export const getPublicInfo = async (req: Request, res: Response, next:NextFunction) => {

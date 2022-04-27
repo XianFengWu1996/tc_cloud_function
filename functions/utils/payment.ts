@@ -27,7 +27,7 @@ export const handlePlaceOrder = async ({ order_id, user_id, cart, customer, paym
         // POINT REDEMPTION
         // calculate how much point should be reward to the user
         // ex: subtotal: 100, will result in 100 * 2, which is 200 point 
-        let reward = Math.round(cart.subtotal * process.env.REWARD_PERCENTAGE);
+        let reward = Math.round(cart.subtotal * Number(process.env.REWARD_PERCENTAGE));
         // the new point will be the old points minus the amount redeem plus the reward for this order
         let new_point_total = user.reward.points - cart.point_redemption + reward;
         let new_point_transaction = user.reward.transactions;
