@@ -22,6 +22,7 @@ interface IDish {
     is_popular: boolean,
     is_lunch: boolean,
     in_stock: boolean,
+    is_customizable: boolean,
     price: number,
     variant: [IVarirant],
     description: string,

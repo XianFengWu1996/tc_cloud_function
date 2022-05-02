@@ -3,7 +3,6 @@ import { body } from 'express-validator';
 import * as storeController from '../controller/store';
 import {  checkTokenInCookie } from '../middleware/auth';
 import { filesUpload } from '../middleware/upload'
-import { date } from '../utils/time';
 
 const store = express.Router();
 
@@ -26,15 +25,60 @@ store.patch('/menus/:dishId',checkTokenInCookie, storeController.updateMenu);
 
 store.post('/menus/image/upload', checkTokenInCookie, filesUpload, storeController.uploadImage)
 
-
-store.get('/test', async(req, res) => {
-
-
-    let new_date = date.plus({ minute: 30}).toUnixInteger()
-
-    res.send({
-        date: date.toUnixInteger(), 
-        new_date
-    })
-})
 export default store;
+
+
+
+
+
+
+// store.get('/add_field_to_dish', async(req, res) => {
+//     try {
+//         let lunch: ICategory[] = []
+//         // let fullday = await firestore().collection(`/menus/${process.env.STORE_ID}/fullday`).get()
+//         let lunch_result = await firestore().collection(`/menus/${process.env.STORE_ID}/lunch`).get()
+        
+//         lunch_result.docs.map((val) => {
+//             let data = val.data() as ICategory;
+//             lunch.push(data);
+//         })
+
+//         lunch.map(async (_) => {
+//             _.dishes.map((dish) => {
+//                 dish.is_customizable = true
+//             })
+
+//             await firestore().collection(`/menus/${process.env.STORE_ID}/lunch`).doc(_.document_name).update({
+//                 dishes: _.dishes
+//             })
+
+//         })
+
+//         let fullday_result = await firestore().collection(`/menus/${process.env.STORE_ID}/fullday`).get()
+//         let fullday:ICategory[] = []
+
+//         fullday_result.docs.map((val) => {
+//             let data = val.data() as ICategory;
+//             fullday.push(data);
+//         })
+
+//         fullday.map(async (_) => {
+//             _.dishes.map((dish) => {
+//                 dish.is_customizable = true
+//             })
+
+//             await firestore().collection(`/menus/${process.env.STORE_ID}/fullday`).doc(_.document_name).update({
+//                 dishes: _.dishes
+//             })
+
+//         })
+
+//         res.send({ 
+//             // lunch
+//             fullday
+//         })
+//     } catch (error) {
+//         console.log(error)
+//         res.send({ error })
+//     }
+// })
