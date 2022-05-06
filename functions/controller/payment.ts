@@ -61,6 +61,13 @@ export const updatePaymentIntent  = async(req: Request, res: Response) => {
         // filter out the payment intent id from the client secret
         let payment_intent_id = retrieveIntentFromCookie(s_id);
 
+        let intent = await stripe.paymentIntents.retrieve(payment_intent_id);
+
+        // dont update the intent if it is successful already
+        if(intent.status === 'succeeded'){
+            return res.status(200).send({ payment_intent: payment_intent_id});
+        }
+
         await stripe.paymentIntents.update(payment_intent_id, {
             amount: Number((total * 100).toFixed(0)),
             setup_future_usage: req.body.future_use ? 'on_session' : ''

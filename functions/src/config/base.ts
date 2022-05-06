@@ -20,7 +20,7 @@ import cors from 'cors'
 export const middleware = (app: Express) => {
     app.use(helmet());
     app.use(cors({ 
-        origin: ['http://localhost:3000','https://5808-2603-3005-4236-2000-8015-a859-80a-2694.ngrok.io'], 
+        origin: ['http://localhost:3000','https://fac8-2603-3005-4236-2000-f820-d504-58bc-b45d.ngrok.io'], 
         // origin: '*',
         credentials: true,
     }));

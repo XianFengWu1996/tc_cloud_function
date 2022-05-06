@@ -8,6 +8,7 @@ export const Signin = async (req: Request, res: Response, next: NextFunction) =>
         await admin.firestore().runTransaction(async (transaction) => {
             const user_ref = admin.firestore().collection('/usersTest').doc(req.user.uid);
             let user_data = (await transaction.get(user_ref)).data();
+            
 
             // if the user doc (new doc) does not exist
             if(isEmpty(user_data)){

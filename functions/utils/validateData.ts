@@ -128,7 +128,7 @@ export const validateCart = (data: ICart) => {
     if(!isString(data.comments)){
         throw new Error('ERR: Missing comments or wrong type')
     }
-    if(!isBoolean(data.includeUtensils)){
+    if(!isBoolean(data.dont_include_utensils)){
         throw new Error('ERR: Missing includeUtensils or wrong type')
     }
 }

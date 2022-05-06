@@ -80,7 +80,7 @@ export const handlePlaceOrder = async ({ order_id, user_id, cart, customer, paym
                 address: cart.is_delivery ? customer.address : {}
             },
             payment_type: cart.payment_type,
-            includeUtensils: cart.includeUtensils,
+            includeUtensils: cart.dont_include_utensils,
             comments: cart.comments,
             date: {
                 month: date.getMonth() + 1,
@@ -97,8 +97,6 @@ export const handlePlaceOrder = async ({ order_id, user_id, cart, customer, paym
         transaction.create(order_ref, order)            
     })
 } 
-
-
 
 export const getCustomerId = async (uid: string, email: string | undefined) => {
     let user_ref = firestore().collection('/usersTest').doc(uid);
@@ -187,15 +185,17 @@ export const validateIntentStatus = async (payment_intent: string) => {
     // check if the wallet was successful
     let intent = await stripe.paymentIntents.retrieve(payment_intent);
     
-    if(intent.next_action?.type === 'wechat_pay_display_qr_code'){
-        throw new Error('Wechat payment unsuccessful / cancelled')
-    }
-
-    if(intent.last_payment_error){
-        throw new Error(intent.last_payment_error.message)
-    }
 
     if(intent.status !== 'succeeded'){
+
+        if(intent.next_action?.type === 'wechat_pay_display_qr_code'){
+            throw new Error('Wechat payment unsuccessful / cancelled')
+        }
+
+        if(intent.last_payment_error){
+            throw new Error(intent.last_payment_error.message)
+        }
+
         throw new Error('Payment was not successful or cancelled')
     }
 }

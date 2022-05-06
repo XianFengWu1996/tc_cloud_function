@@ -15,7 +15,7 @@ interface ICart{
     tip_type: string,
     payment_type: string,
     comments: string, 
-    includeUtensils: boolean,
+    dont_include_utensils: boolean,
 }
 
 interface ICartItem {
