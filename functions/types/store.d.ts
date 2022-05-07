@@ -20,7 +20,7 @@ declare global {
         zipcode: string,
     }
     
-    export interface IHours {
+    interface IHours {
         day_of_week: string,
         open_hour: number,
         close_hour: number,

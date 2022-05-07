@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Stripe from "stripe";
 import { validateCart, validateCustomer } from "../utils/validateData";
-import { createPaymentIntent, generatePublicPaymentList, getCustomerId, handlePlaceOrder, retrieveIntentFromCookie, validateIntentStatus } from '../utils/payment'
+import { createPaymentIntent, generatePublicPaymentList, getCustomerId, retrieveIntentFromCookie, validateIntentStatus } from '../utils/payment'
 import { v4 } from "uuid";
 import { firestore } from "firebase-admin";
 import { isBoolean, isNumber, isString } from "lodash";
@@ -96,7 +96,7 @@ export const placeOnlineOrder =  async (req: Request, res: Response) => {
         let order_id = v4();
 
         // place the order to firestore
-        await handlePlaceOrder({ order_id, user_id: req.user.uid, cart, customer, payment_intent_id: req.body.payment_intent });
+        // await handlePlaceOrder({ order_id, user_id: req.user.uid, cart, customer, payment_intent_id: req.body.payment_intent });
         
         //remove the cookie (s_id) after the order completes for new payment
         if(req.body.is_new){
@@ -129,7 +129,7 @@ export const placeCashOrder = async (req: Request, res: Response) => {
         let order_id = v4();
 
         // place the order to firestore
-        await handlePlaceOrder({ order_id, user_id: req.user.uid, cart, customer, payment_intent_id: '' });
+        // await handlePlaceOrder({ order_id, user_id: req.user.uid, cart, customer, payment_intent_id: '' });
 
         res.send({ 
             order_id,  

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { firestore } from "firebase-admin"
-import { isEmpty, isString } from "lodash";
+import { isEmpty, isString, update } from "lodash";
 import { stripe } from "../controller/payment";
 
 interface IPlaceOrder {
@@ -11,12 +11,140 @@ interface IPlaceOrder {
     payment_intent_id: string,
 }
 
-export const handlePlaceOrder = async ({ order_id, user_id, cart, customer, payment_intent_id}: IPlaceOrder) => {
+interface IHandleRewardPointCalculation {
+    subtotal: number,
+    point_redemption: number,
+    reward_point: number, 
+    transactions: IRewardTransaction[],
+    order_id: string,
+    created_at: number,
+}
+const handleRewardPointCalculation = (_: IHandleRewardPointCalculation) => {
+        /*
+            calculate how much point should be reward to the user
+            ex: subtotal: $100, will result in 100 * 2, which is 200 point = $2 at time of redemption
+         */ 
+        let reward = Math.round(_.subtotal * Number(process.env.REWARD_PERCENTAGE));
+
+        // the new point will be the old points minus the amount redeem plus the reward for this order
+        let updated_reward_point = _.reward_point - _.point_redemption + reward; // original point minus the redeem amount plus the new reward amount
+        let updated_reward_transactions = _.transactions;
+        
+        /*
+            if point_redemption is greater than 0, it means that the customer made a redemption,
+            we will want to create an new transaction object and unshift it into the transaction array
+        */
+        if(_.point_redemption > 0){
+            updated_reward_transactions.unshift({
+                type: TransactionType.redeem,
+                amount: _.point_redemption,
+                order_id: _.order_id,
+                created_at: _.created_at,
+            });
+        }
+        
+        // generate a transaction object for the reward for this order and unshift it to the transaction array
+        updated_reward_transactions.unshift({
+            type: TransactionType.reward,
+            amount: reward,
+            order_id: _.order_id, 
+            created_at: _.created_at,
+        });
+
+        return {
+            reward_earned: reward,
+            updated_reward_point, 
+            updated_reward_transactions
+        }
+}
+
+export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_intent_id}: IPlaceOrder) => {
+    const date = new Date();
+    const created_at = Date.now();
+
+    await firestore().runTransaction(async transaction => {
+        let order_ref = firestore().collection('orderTest').doc(cart.order_id);
+        let user_ref = firestore().collection('usersTest').doc(user_id)
+
+        let user = (await transaction.get(user_ref)).data() as ICustomer
+        if(!user){
+            throw new Error('User data not found')
+        }
+
+        let { updated_reward_point, updated_reward_transactions, reward_earned} = handleRewardPointCalculation({
+            subtotal: cart.subtotal,
+            point_redemption: cart.point_redemption,
+            reward_point: user.reward.points, 
+            transactions: user.reward.transactions,
+            order_id: cart.order_id,
+            created_at: created_at,
+        })
+
+     
+
+        transaction.update(user_ref, {
+            reward: {
+                points: updated_reward_point, 
+                transactions: updated_reward_transactions
+            }
+        })
+
+        let order: IFirestoreOrder = {
+            order_id: cart.order_id,
+            user_id: user_id,
+            name: customer.name,
+            phone: customer.phone,
+            payment: {
+                payment_type: cart.payment_type,
+                payment_intent_id: payment_intent_id,
+                customer_id: user.billings.stripe_customer_id,
+            },
+            items: cart.cart,
+            summary: {
+                discount: {
+                    lunch_discount: cart.lunch_discount,
+                    point_discount: Number((cart.point_redemption / 100).toFixed(2))
+                },
+                subtotal: cart.subtotal,
+                original_subtotal: cart.original_subtotal,
+                tax: cart.tax,
+                tip: cart.tip,
+                delivery_fee: cart.is_delivery ? cart.delivery_fee : 0,
+                total: cart.total,
+                refund: {
+                    amount: 0,
+                    refund_reason: ''
+                }
+            },
+            delivery: {
+                is_delivery: cart.is_delivery,
+                address: cart.is_delivery ? customer.address : {}
+            },
+            dont_include_utensils: cart.dont_include_utensils,
+            comments: cart.comments,
+            date: {
+                month: date.getMonth() + 1,
+                day: date.getDate(),
+                year: date.getFullYear(),
+            }, 
+            points: {
+                reward: reward_earned,
+                point_redemption: cart.point_redemption
+            },
+            created_at: created_at,
+            status: 'completed'
+        }
+
+        transaction.create(order_ref, order)            
+    })
+} 
+
+export const handlePlaceOnline = async ({ user_id, cart, customer, payment_intent_id}: IPlaceOrder) => {
     let date = new Date();
     let created_at = Date.now();
 
     await firestore().runTransaction(async transaction => {
-        let order_ref = firestore().collection('orderTest').doc(order_id);
+        let order_ref = firestore().collection('orderTest').doc(cart.order_id);
         let user_ref = firestore().collection('usersTest').doc(user_id)
 
         let user = (await transaction.get(user_ref)).data() as ICustomer
@@ -36,7 +164,7 @@ export const handlePlaceOrder = async ({ order_id, user_id, cart, customer, paym
             new_point_transaction.unshift({
                 type: TransactionType.redeem,
                 amount: cart.point_redemption,
-                order_id,
+                order_id: cart.order_id,
                 created_at,
             });
         }
@@ -44,7 +172,7 @@ export const handlePlaceOrder = async ({ order_id, user_id, cart, customer, paym
         new_point_transaction.unshift({
             type: TransactionType.reward,
             amount: new_point_total,
-            order_id: order_id, 
+            order_id: cart.order_id, 
             created_at,
         });
 
@@ -55,17 +183,24 @@ export const handlePlaceOrder = async ({ order_id, user_id, cart, customer, paym
             }
         })
 
-        let order = {
-            order_id,
+        let order: IFirestoreOrder = {
+            order_id: cart.order_id,
             user_id: user_id,
-            payment_intent_id, // the payment intent stripe
             name: customer.name,
             phone: customer.phone,
+            payment: {
+                payment_type: cart.payment_type,
+                payment_intent_id: payment_intent_id,
+                customer_id: user.billings.stripe_customer_id,
+            },
             items: cart.cart,
             summary: {
-                lunch_discount: cart.lunch_discount,
-                discount: cart.point_redemption / 100,
+                discount: {
+                    lunch_discount: cart.lunch_discount,
+                    point_discount: Number((cart.point_redemption / 100).toFixed(2))
+                },
                 subtotal: cart.subtotal,
+                original_subtotal: cart.original_subtotal,
                 tax: cart.tax,
                 tip: cart.tip,
                 delivery_fee: cart.is_delivery ? cart.delivery_fee : 0,
@@ -79,8 +214,7 @@ export const handlePlaceOrder = async ({ order_id, user_id, cart, customer, paym
                 is_delivery: cart.is_delivery,
                 address: cart.is_delivery ? customer.address : {}
             },
-            payment_type: cart.payment_type,
-            includeUtensils: cart.dont_include_utensils,
+            dont_include_utensils: cart.dont_include_utensils,
             comments: cart.comments,
             date: {
                 month: date.getMonth() + 1,
@@ -92,6 +226,7 @@ export const handlePlaceOrder = async ({ order_id, user_id, cart, customer, paym
                 point_redemption: cart.point_redemption
             },
             created_at: created_at,
+            status: 'completed'
         }
 
         transaction.create(order_ref, order)            
