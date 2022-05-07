@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { firestore } from "firebase-admin"
-import { isEmpty, isString, update } from "lodash";
+import { isEmpty, isString } from "lodash";
 import { stripe } from "../controller/payment";
 
 interface IPlaceOrder {
