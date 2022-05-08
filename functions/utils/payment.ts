@@ -152,37 +152,6 @@ export const handlePlaceOnline = async ({ user_id, cart, customer, payment_inten
             throw new Error('User data not found')
         }
 
-        // POINT REDEMPTION
-        // calculate how much point should be reward to the user
-        // ex: subtotal: 100, will result in 100 * 2, which is 200 point 
-        let reward = Math.round(cart.subtotal * Number(process.env.REWARD_PERCENTAGE));
-        // the new point will be the old points minus the amount redeem plus the reward for this order
-        let new_point_total = user.reward.points - cart.point_redemption + reward;
-        let new_point_transaction = user.reward.transactions;
-        // generate a transaction object for redemption only if point was redeemed
-        if(cart.point_redemption > 0){
-            new_point_transaction.unshift({
-                type: TransactionType.redeem,
-                amount: cart.point_redemption,
-                order_id: cart.order_id,
-                created_at,
-            });
-        }
-        // generate a transaction object for rewards
-        new_point_transaction.unshift({
-            type: TransactionType.reward,
-            amount: new_point_total,
-            order_id: cart.order_id, 
-            created_at,
-        });
-
-        transaction.update(user_ref, {
-            reward: {
-                points: new_point_total, 
-                transactions: new_point_transaction
-            }
-        })
-
         let order: IFirestoreOrder = {
             order_id: cart.order_id,
             user_id: user_id,
@@ -222,11 +191,11 @@ export const handlePlaceOnline = async ({ user_id, cart, customer, payment_inten
                 year: date.getFullYear(),
             }, 
             points: {
-                reward,
+                reward: 0,
                 point_redemption: cart.point_redemption
             },
             created_at: created_at,
-            status: 'completed'
+            status: 'required_payment'
         }
 
         transaction.create(order_ref, order)            
