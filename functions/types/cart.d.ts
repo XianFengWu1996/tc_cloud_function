@@ -79,7 +79,6 @@ interface IFirestoreOrder {
         point_redemption: number,
     },
     status: 'completed' | 'required_payment',
-    confirm_by_store: 'not_confirm' | 'confirmed',
     created_at: number
     
 }
