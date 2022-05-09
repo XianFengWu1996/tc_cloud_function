@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { firestore } from "firebase-admin"
-import { isEmpty, isString } from "lodash";
+import { isEmpty, isString, merge } from "lodash";
 import { stripe } from "../controller/payment";
 
 interface IPlaceOrder {
@@ -136,7 +136,7 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_in
             status: 'completed',
         }
 
-        transaction.create(order_ref, order)            
+        transaction.set(order_ref, order, { merge: true})            
     })
 } 
 
@@ -204,7 +204,7 @@ export const handlePlaceOnlineOrder = async ({ user_id, cart, customer, payment_
             status: 'required_payment',
         }
 
-        transaction.create(order_ref, order)            
+        transaction.set(order_ref, order, { merge: true })            
     })
 } 
 
