@@ -38,9 +38,11 @@ interface IVarirantOption {
 
 interface IFirestoreOrder {
     order_id: string, 
-    user_id: string, 
-    name: string,
-    phone: string,
+    user: {
+        user_id: string, 
+        name: string,
+        phone: string,
+    },
     items: ICartItem[],
     summary: {
         discount: {
@@ -62,13 +64,15 @@ interface IFirestoreOrder {
         is_delivery: boolean,
         address: IAddress | {},
     },
+    additional_request: {
+        dont_include_utensils: boolean,
+        comments: string,
+    }
     payment: {
         payment_type: string,
         payment_intent_id: string,
         customer_id: string,
     },
-    dont_include_utensils: boolean,
-    comments: string,
     date: {
         month: number,
         day: number,

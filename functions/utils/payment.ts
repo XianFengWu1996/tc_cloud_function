@@ -4,7 +4,6 @@ import { isEmpty, isString } from "lodash";
 import { stripe } from "../controller/payment";
 
 interface IPlaceOrder {
-    order_id: string, 
     user_id: string,
     cart: ICart,
     customer: ICustomer,
@@ -80,8 +79,6 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_in
             created_at: created_at,
         })
 
-     
-
         transaction.update(user_ref, {
             reward: {
                 points: updated_reward_point, 
@@ -91,9 +88,11 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_in
 
         let order: IFirestoreOrder = {
             order_id: cart.order_id,
-            user_id: user_id,
-            name: customer.name,
-            phone: customer.phone,
+            user: {
+                user_id: user_id,
+                name: customer.name,
+                phone: customer.phone,
+            },
             payment: {
                 payment_type: cart.payment_type,
                 payment_intent_id: payment_intent_id,
@@ -120,8 +119,10 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_in
                 is_delivery: cart.is_delivery,
                 address: cart.is_delivery ? customer.address : {}
             },
-            dont_include_utensils: cart.dont_include_utensils,
-            comments: cart.comments,
+            additional_request: {
+                dont_include_utensils: cart.dont_include_utensils,
+                comments: cart.comments,
+            },
             date: {
                 month: date.getMonth() + 1,
                 day: date.getDate(),
@@ -139,10 +140,11 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_in
     })
 } 
 
-export const handlePlaceOnline = async ({ user_id, cart, customer, payment_intent_id}: IPlaceOrder) => {
+export const handlePlaceOnlineOrder = async ({ user_id, cart, customer, payment_intent_id}: IPlaceOrder) => {
     let date = new Date();
     let created_at = Date.now();
 
+    console.log(cart.order_id)
     await firestore().runTransaction(async transaction => {
         let order_ref = firestore().collection('orderTest').doc(cart.order_id);
         let user_ref = firestore().collection('usersTest').doc(user_id)
@@ -154,9 +156,11 @@ export const handlePlaceOnline = async ({ user_id, cart, customer, payment_inten
 
         let order: IFirestoreOrder = {
             order_id: cart.order_id,
-            user_id: user_id,
-            name: customer.name,
-            phone: customer.phone,
+            user: {
+                user_id: user_id,
+                name: customer.name,
+                phone: customer.phone,
+            },
             payment: {
                 payment_type: cart.payment_type,
                 payment_intent_id: payment_intent_id,
@@ -183,8 +187,10 @@ export const handlePlaceOnline = async ({ user_id, cart, customer, payment_inten
                 is_delivery: cart.is_delivery,
                 address: cart.is_delivery ? customer.address : {}
             },
-            dont_include_utensils: cart.dont_include_utensils,
-            comments: cart.comments,
+            additional_request: {
+                dont_include_utensils: cart.dont_include_utensils,
+                comments: cart.comments,
+            },
             date: {
                 month: date.getMonth() + 1,
                 day: date.getDate(),

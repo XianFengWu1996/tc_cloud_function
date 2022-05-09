@@ -1,11 +1,9 @@
 import { Request, Response } from "express";
 import Stripe from "stripe";
 import { validateCart, validateCustomer } from "../utils/validateData";
-import { createPaymentIntent, generatePublicPaymentList, getCustomerId, retrieveIntentFromCookie, validateIntentStatus } from '../utils/payment'
-import { v4 } from "uuid";
+import { createPaymentIntent, generatePublicPaymentList, getCustomerId, handlePlaceCashOrder, handlePlaceOnlineOrder, retrieveIntentFromCookie } from '../utils/payment'
 import { firestore } from "firebase-admin";
 import { isBoolean, isNumber, isString } from "lodash";
-import { date } from '../utils/time'
 
 
 export const stripe = new Stripe('sk_test_zXSjQbIUWTqONah6drD5oFvC00islas5P7', {
@@ -81,35 +79,37 @@ export const updatePaymentIntent  = async(req: Request, res: Response) => {
 
 export const placeOnlineOrder =  async (req: Request, res: Response) => {
     try {    
-        if(!isBoolean(req.body.is_new)){
-            throw new Error('ERR: is_new is required')
-        }
+        // if(!isBoolean(req.body.is_new)){
+        //     throw new Error('ERR: is_new is required')
+        // }
 
-        await validateIntentStatus(req.body.payment_intent);
+        // await validateIntentStatus(req.body.payment_intent);
 
         // validate all the data
         validateCustomer(req.body.customer);
         validateCart(req.body.cart);
-
-        let customer:ICustomer = req.body.customer;
-        let cart:ICart = req.body.cart;
-        let order_id = v4();
-
         // place the order to firestore
-        // await handlePlaceOrder({ order_id, user_id: req.user.uid, cart, customer, payment_intent_id: req.body.payment_intent });
+        await handlePlaceOnlineOrder({ 
+            user_id: req.user.uid, 
+            cart: req.body.cart as ICart, 
+            customer: req.body.customer as ICustomer, 
+            payment_intent_id: req.body.payment_intent ?? ''
+        });
         
         //remove the cookie (s_id) after the order completes for new payment
-        if(req.body.is_new){
-            res.clearCookie('s_id');
-        }
+        // if(req.body.is_new){
+        //     res.clearCookie('s_id');
+        // }
 
-        res.send({ 
-            order_id,  
-            order_time: date.toFormat('DDD T'), 
-            item_count: cart.cart_quantity,
-            estimate: cart.is_delivery ? 45 : 15, // for now
-            total: cart.total
-        })
+        // res.send({ 
+        //     order_id: cart.order_id,  
+        //     order_time: date.toFormat('DDD T'), 
+        //     item_count: cart.cart_quantity,
+        //     estimate: cart.is_delivery ? 45 : 15, // for now
+        //     total: cart.total
+        // })
+        console.log('success')
+        res.status(200).send();
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to submit order' })
     }
@@ -121,20 +121,22 @@ export const placeCashOrder = async (req: Request, res: Response) => {
          validateCustomer(req.body.customer);
          validateCart(req.body.cart);
 
-        let customer:ICustomer = req.body.customer;
-        let cart:ICart = req.body.cart;
-        let order_id = v4();
-
         // place the order to firestore
-        // await handlePlaceOrder({ order_id, user_id: req.user.uid, cart, customer, payment_intent_id: '' });
-
-        res.send({ 
-            order_id,  
-            order_time: date.toFormat('DDD T'), 
-            item_count: cart.cart_quantity,
-            estimate: cart.is_delivery ? 45 : 15, // for now
-            total: cart.total
+        await handlePlaceCashOrder({ 
+            user_id: req.user.uid, 
+            cart: req.body.cart as ICart,
+            customer: req.body.customer as ICustomer,
+            payment_intent_id: '',
         })
+
+        // res.send({ 
+        //     order_id,  
+        //     order_time: date.toFormat('DDD T'), 
+        //     item_count: cart.cart_quantity,
+        //     estimate: cart.is_delivery ? 45 : 15, // for now
+        //     total: cart.total
+        // })
+        res.status(200).send();
     } catch (error) {
         console.log(error)
         res.status(400).send({ error: (error as Error).message ?? 'Failed to submit order' })
