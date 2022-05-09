@@ -132,7 +132,8 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_in
                 point_redemption: cart.point_redemption
             },
             created_at: created_at,
-            status: 'completed'
+            status: 'completed',
+            confirm_by_store: 'not_confirm'
         }
 
         transaction.create(order_ref, order)            
@@ -195,7 +196,8 @@ export const handlePlaceOnline = async ({ user_id, cart, customer, payment_inten
                 point_redemption: cart.point_redemption
             },
             created_at: created_at,
-            status: 'required_payment'
+            status: 'required_payment',
+            confirm_by_store: 'not_confirm'
         }
 
         transaction.create(order_ref, order)            

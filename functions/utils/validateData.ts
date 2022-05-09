@@ -82,6 +82,10 @@ export const validateCart = (data: ICart) => {
         throw new Error('ERR: Missing cart information')
     }
 
+    if(isEmpty(data.order_id)){
+        throw new Error('ERR: Missing order id')
+    }
+
     if(isEmpty(data.cart)){
         throw new Error('ERR: Cart is empty, please add some items')
     }

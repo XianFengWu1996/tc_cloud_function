@@ -117,9 +117,6 @@ export const placeOnlineOrder =  async (req: Request, res: Response) => {
 
 export const placeCashOrder = async (req: Request, res: Response) => {
     try {
-        console.log('cash order')
-        console.log(date)
-
          // validate all the data
          validateCustomer(req.body.customer);
          validateCart(req.body.cart);
