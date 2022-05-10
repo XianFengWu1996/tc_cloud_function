@@ -3,7 +3,8 @@ import Stripe from "stripe";
 import { validateCart, validateCustomer } from "../utils/validateData";
 import { createPaymentIntent, generatePublicPaymentList, getCustomerId, handlePlaceCashOrder, handlePlaceOnlineOrder, retrieveIntentFromCookie } from '../utils/payment'
 import { firestore } from "firebase-admin";
-import { isBoolean, isNumber, isString } from "lodash";
+import { isBoolean, isEmpty, isNumber, isString } from "lodash";
+import { date, timestamp } from "../utils/time";
 
 
 export const stripe = new Stripe('sk_test_zXSjQbIUWTqONah6drD5oFvC00islas5P7', {
@@ -42,7 +43,7 @@ export const getSavedPaymentList = async ( req: Request, res: Response) => {
 export const updatePaymentIntent  = async(req: Request, res: Response) => {
     try {
         let s_id = req.cookies.s_id;
-        let total = req.body.total 
+        let total = req.body.total;
         
         if(!isString(s_id)){
             throw new Error('ERR: s_id is not avaiable')
@@ -68,10 +69,12 @@ export const updatePaymentIntent  = async(req: Request, res: Response) => {
 
         await stripe.paymentIntents.update(payment_intent_id, {
             amount: Number((total * 100).toFixed(0)),
-            setup_future_usage: req.body.future_use ? 'on_session' : ''
+            setup_future_usage: req.body.future_use ? 'off_session' : '',
         })
     
         res.status(200).send({ payment_intent: payment_intent_id});
+
+
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to update intent'})
     }
@@ -117,6 +120,70 @@ export const placeCashOrder = async (req: Request, res: Response) => {
     }
 }
 
+export const confirmOnlineOrder = async (req: Request, res: Response) => {
+    try {
+        let s_id = req.cookies.s_id;
+        let cart = req.body.cart as ICart;
+
+        console.log(cart);
+
+
+        if(isEmpty(s_id)){
+            throw new Error('Unable to find the s_id, please refresh the payment page')
+        }
+        validateCart(cart);
+
+
+        let payment_intent = retrieveIntentFromCookie(s_id)
+
+        let intent = await stripe.paymentIntents.retrieve(payment_intent);
+
+        if(intent.status !== 'succeeded'){
+            throw new Error('Payment was not successful')
+        }
+
+        let order:IFirestoreOrder |  {} = {
+            payment: {
+                payment_intent_id: intent.id,
+            },
+            date: {
+                month: date.month,
+                day: date.day,
+                year: date.year,
+            },
+            summary: {
+                subtotal: cart.subtotal,
+                original_subtotal: cart.original_subtotal,
+                tax: cart.tax,
+                tip: cart.tip,
+                tip_type: cart.tip_type,
+                total: cart.total,
+            },
+            created_at: timestamp,
+            status: 'completed'
+        }
+
+        // at this point, the order is already in the database and the payment is successful
+        await firestore().collection('orderTest').doc(cart.order_id).set(order, { merge: true })
+
+        const format_date = date.toFormat('DDD T')
+
+        res.clearCookie('s_id');
+
+        res.status(200).send({
+            order_id: cart.order_id,
+            order_time: format_date,
+            estimate: 15, 
+            item_count: cart.cart_quantity,
+            total: cart.total
+        });
+    
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({ error: (error as Error).message ?? 'Failed to submit order' })
+    }
+}
+
 export const usePaymentMethodId = async (req: Request, res: Response) => {
     try {
         if(!isString(req.body.card.id)){
@@ -145,6 +212,8 @@ export const usePaymentMethodId = async (req: Request, res: Response) => {
             payment_method: payment_method_id,
             confirm: true,
         })
+
+        res.clearCookie('s_id')
 
         res.send({
             payment_intent: stripe_result.id,

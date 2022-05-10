@@ -16,4 +16,6 @@ payment.post("/place_online_order", checkFirebaseToken, paymentController.placeO
 
 payment.post("/place_cash_order", checkFirebaseToken, paymentController.placeCashOrder)
 
+payment.post("/confirm_online_order", checkFirebaseToken, paymentController.confirmOnlineOrder)
+
 export default payment;

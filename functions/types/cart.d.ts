@@ -16,6 +16,7 @@ interface ICart{
     tip_type: string,
     payment_type: string,
     comments: string, 
+    schedule_time: string,
     dont_include_utensils: boolean,
 }
 
@@ -43,7 +44,7 @@ interface IFirestoreOrder {
         name: string,
         phone: string,
     },
-    items: ICartItem[],
+    items: ICartItem[] ,
     summary: {
         discount: {
             lunch_discount: number,
@@ -53,20 +54,22 @@ interface IFirestoreOrder {
         original_subtotal: number, // need to use this to recalculate the total if we remove lunch discount
         tax: number,
         tip: number,
+        tip_type: string,
         delivery_fee: number, 
         total: number,
         refund: {
             amount: number,
-            refund_reason: '',
+            refund_reason: string,
         }
     },
     delivery: {
         is_delivery: boolean,
-        address: IAddress | {},
+        address: IAddress | null,
     },
     additional_request: {
         dont_include_utensils: boolean,
         comments: string,
+        schedule_time: string,
     }
     payment: {
         payment_type: string,
@@ -76,7 +79,7 @@ interface IFirestoreOrder {
     date: {
         month: number,
         day: number,
-        year: number
+        year: number,
     },
     points: {
         reward: number,

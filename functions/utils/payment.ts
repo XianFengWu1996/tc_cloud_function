@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { firestore } from "firebase-admin"
-import { isEmpty, isString, merge } from "lodash";
+import { isEmpty, isString } from "lodash";
 import { stripe } from "../controller/payment";
+import { date, timestamp } from "./time";
 
 interface IPlaceOrder {
     user_id: string,
@@ -58,9 +59,6 @@ const handleRewardPointCalculation = (_: IHandleRewardPointCalculation) => {
 }
 
 export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_intent_id}: IPlaceOrder) => {
-    const date = new Date();
-    const created_at = Date.now();
-
     await firestore().runTransaction(async transaction => {
         let order_ref = firestore().collection('orderTest').doc(cart.order_id);
         let user_ref = firestore().collection('usersTest').doc(user_id)
@@ -76,7 +74,7 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_in
             reward_point: user.reward.points, 
             transactions: user.reward.transactions,
             order_id: cart.order_id,
-            created_at: created_at,
+            created_at: timestamp,
         })
 
         transaction.update(user_ref, {
@@ -108,6 +106,7 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_in
                 original_subtotal: cart.original_subtotal,
                 tax: cart.tax,
                 tip: cart.tip,
+                tip_type: cart.tip_type,
                 delivery_fee: cart.is_delivery ? cart.delivery_fee : 0,
                 total: cart.total,
                 refund: {
@@ -117,22 +116,23 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_in
             },
             delivery: {
                 is_delivery: cart.is_delivery,
-                address: cart.is_delivery ? customer.address : {}
+                address: cart.is_delivery ? customer.address : null
             },
             additional_request: {
                 dont_include_utensils: cart.dont_include_utensils,
                 comments: cart.comments,
+                schedule_time: cart.schedule_time
             },
             date: {
-                month: date.getMonth() + 1,
-                day: date.getDate(),
-                year: date.getFullYear(),
-            }, 
+                month: date.month,
+                day: date.day,
+                year: date.year,
+            },
             points: {
                 reward: reward_earned,
                 point_redemption: cart.point_redemption
             },
-            created_at: created_at,
+            created_at: timestamp,
             status: 'completed',
         }
 
@@ -141,10 +141,6 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_in
 } 
 
 export const handlePlaceOnlineOrder = async ({ user_id, cart, customer, payment_intent_id}: IPlaceOrder) => {
-    let date = new Date();
-    let created_at = Date.now();
-
-    console.log(cart.order_id)
     await firestore().runTransaction(async transaction => {
         let order_ref = firestore().collection('orderTest').doc(cart.order_id);
         let user_ref = firestore().collection('usersTest').doc(user_id)
@@ -176,6 +172,7 @@ export const handlePlaceOnlineOrder = async ({ user_id, cart, customer, payment_
                 original_subtotal: cart.original_subtotal,
                 tax: cart.tax,
                 tip: cart.tip,
+                tip_type: cart.tip_type,
                 delivery_fee: cart.is_delivery ? cart.delivery_fee : 0,
                 total: cart.total,
                 refund: {
@@ -185,22 +182,23 @@ export const handlePlaceOnlineOrder = async ({ user_id, cart, customer, payment_
             },
             delivery: {
                 is_delivery: cart.is_delivery,
-                address: cart.is_delivery ? customer.address : {}
+                address: cart.is_delivery ? customer.address : null
             },
             additional_request: {
                 dont_include_utensils: cart.dont_include_utensils,
                 comments: cart.comments,
+                schedule_time: cart.schedule_time
             },
             date: {
-                month: date.getMonth() + 1,
-                day: date.getDate(),
-                year: date.getFullYear(),
-            }, 
+                month: date.month,
+                day: date.day,
+                year: date.year,
+            },
             points: {
                 reward: 0,
                 point_redemption: cart.point_redemption
             },
-            created_at: created_at,
+            created_at: timestamp,
             status: 'required_payment',
         }
 
