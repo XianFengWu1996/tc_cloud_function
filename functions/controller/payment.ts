@@ -125,9 +125,6 @@ export const confirmOnlineOrder = async (req: Request, res: Response) => {
         let s_id = req.cookies.s_id;
         let cart = req.body.cart as ICart;
 
-        console.log(cart);
-
-
         if(isEmpty(s_id)){
             throw new Error('Unable to find the s_id, please refresh the payment page')
         }

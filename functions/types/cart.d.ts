@@ -23,10 +23,30 @@ interface ICart{
 interface ICartItem {
     id: string,
     dish: IDish,
-    option: IVarirantOption,
-    comment: string,
+    option: IVarirantOption | null,
+    comment: string | null,
     quantity: number,
     total: number,
+    lunchOption: ILunchOption | null,
+    customize: ICustomize | null
+}
+
+interface ICustomizeItem {
+    id: string,
+    en_name: string,
+    ch_name: string,
+    price: number,
+}
+
+interface ICustomize {
+    protein: ICustomizeItem[],
+    veggie: ICustomizeItem[],
+}
+
+interface ILunchOption {
+    sub: boolean,
+    no_soup: boolean,
+    no_rice: boolean,
 }
 
 interface IVarirantOption {
