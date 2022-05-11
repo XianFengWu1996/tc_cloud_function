@@ -125,8 +125,6 @@ export const confirmOnlineOrder = async (req: Request, res: Response) => {
     try {
         let s_id = req.cookies.s_id;
         let cart = req.body.cart as ICart;
-        let customer_name = req.body.customer_name;
-
 
         // check if the cookie contain s_id, 
         if(isEmpty(s_id)){
@@ -136,18 +134,23 @@ export const confirmOnlineOrder = async (req: Request, res: Response) => {
         // validate the cart 
         validateCart(cart);
 
+        const payment_intent = retrieveIntentFromCookie(s_id)
+        const stripe_result = await stripe.paymentIntents.retrieve(payment_intent);
+        if(stripe_result.status !== 'succeeded'){
+            throw new Error('Payment was not successful')
+        }
+
         // handle confirming the order in firestore
-        await handleConfirmingOrder(s_id, cart, req.user.uid)
+        let { customer } = await handleConfirmingOrder(cart, req.user.uid, stripe_result)
 
         // clear the s_id cookie once everything is successful
         res.clearCookie('s_id');
 
         res.status(200).send({
-            redirect_url: `/order/confirmation?order_id=${cart.order_id}&order_time=${format_date}&name=${customer_name}&estimate=${15}&item_count=${cart.cart_quantity}&total=${cart.total}`
+            redirect_url: `/order/confirmation?order_id=${cart.order_id}&order_time=${format_date}&name=${customer.name}&estimate=${15}&item_count=${cart.cart_quantity}&total=${cart.total}`
         });
     
     } catch (error) {
-        console.log(error);
         res.status(400).send({ error: (error as Error).message ?? 'Failed to submit order' })
     }
 }

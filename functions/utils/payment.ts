@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { firestore } from "firebase-admin"
 import { isEmpty, isString } from "lodash";
+import Stripe from "stripe";
 import { stripe } from "../controller/payment";
 import { date, timestamp } from "./time";
 
@@ -223,18 +224,15 @@ export const getCustomerId = async (uid: string, email: string | undefined) => {
     return customer_id
 }
 
-export const handleConfirmingOrder = async (s_id: string, cart:ICart, user_id: string) => {
+export const handleConfirmingOrder = async (cart:ICart, user_id: string, stripe_result: Stripe.Response<Stripe.PaymentIntent>) => {
+    let customer = {} as ICustomer;
+
     await firestore().runTransaction(async (transaction) => {
         const user_ref = firestore().collection('usersTest').doc(user_id)
         const order_ref = firestore().collection('orderTest').doc(cart.order_id);
 
-        const customer = (await transaction.get(user_ref)).data() as ICustomer;
-
-        const payment_intent = retrieveIntentFromCookie(s_id)
-        const intent = await stripe.paymentIntents.retrieve(payment_intent);
-        if(intent.status !== 'succeeded'){
-            throw new Error('Payment was not successful')
-        }
+        customer = (await transaction.get(user_ref)).data() as ICustomer;
+       
         const { updated_reward_point, updated_reward_transactions, reward_earned} = handleRewardPointCalculation({cart, customer});
 
         transaction.update(user_ref, {
@@ -247,7 +245,7 @@ export const handleConfirmingOrder = async (s_id: string, cart:ICart, user_id: s
         // at this point, the order is already in the database and the payment is successful
         transaction.set(order_ref, {
             payment: {
-                payment_intent_id: intent.id,
+                payment_intent_id: stripe_result.id
             },
             date: {
                 month: date.month,
@@ -270,6 +268,10 @@ export const handleConfirmingOrder = async (s_id: string, cart:ICart, user_id: s
             status: 'completed'
         } as IFirestoreOrder | {}, { merge: true })
     })
+
+    return {
+        customer
+    }
 }
 
 // STRIPE RELATED
