@@ -11,11 +11,13 @@ payment.get('/get_payment_method', checkFirebaseToken, paymentController.getSave
 
 payment.post('/payment_method_id', checkFirebaseToken, paymentController.usePaymentMethodId)
 
+payment.post("/pay_with_intent", checkFirebaseToken, paymentController.usePaymentIntent)
+
+
 // order 
 payment.post("/place_online_order", checkFirebaseToken, paymentController.placeOnlineOrder);
 
 payment.post("/place_cash_order", checkFirebaseToken, paymentController.placeCashOrder)
 
-payment.post("/confirm_online_order", checkFirebaseToken, paymentController.confirmOnlineOrder)
 
 export default payment;

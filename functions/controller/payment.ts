@@ -4,8 +4,7 @@ import { validateCart, validateCustomer } from "../utils/validateData";
 import { createPaymentIntent, generatePublicPaymentList, getCustomerId, handleConfirmingOrder, handlePlaceCashOrder, handlePlaceOnlineOrder, retrieveIntentFromCookie } from '../utils/payment'
 import { firestore } from "firebase-admin";
 import { isBoolean, isEmpty, isNumber, isString } from "lodash";
-import { date, format_date, timestamp } from "../utils/time";
-import { format } from "path/posix";
+import { format_date } from "../utils/time";
 
 
 export const stripe = new Stripe('sk_test_zXSjQbIUWTqONah6drD5oFvC00islas5P7', {
@@ -81,6 +80,7 @@ export const updatePaymentIntent  = async(req: Request, res: Response) => {
     }
 }
 
+// place an online order but not process the payment yet
 export const placeOnlineOrder =  async (req: Request, res: Response) => {
     try {    
         // validate all the data
@@ -100,6 +100,7 @@ export const placeOnlineOrder =  async (req: Request, res: Response) => {
     }
 }
 
+// place the order since it does not require payment
 export const placeCashOrder = async (req: Request, res: Response) => {
     try {
          // validate all the data
@@ -121,7 +122,47 @@ export const placeCashOrder = async (req: Request, res: Response) => {
     }
 }
 
-export const confirmOnlineOrder = async (req: Request, res: Response) => {
+// pay with existing payment method id
+export const usePaymentMethodId = async (req: Request, res: Response) => {
+    try {
+        if(!isString(req.body.card.id)){
+            throw new Error('ERR: Payment method is invalid')
+        }
+        validateCart(req.body.cart);
+
+        const cart:ICart = req.body.cart;
+        const payment_method_id = req.body.card.id;
+
+        let customer = (await firestore().collection('usersTest').doc(req.user.uid).get()).data() as ICustomer
+
+        if(!customer) {
+            throw new Error('ERR: No user found')
+        }
+
+        let stripe_result = await stripe.paymentIntents.create({
+            amount: Number((cart.total * 100).toFixed(0)),
+            currency: 'usd',
+            customer: customer.billings.stripe_customer_id,
+            payment_method: payment_method_id,
+            confirm: true,
+        })
+
+        if(stripe_result.status !== 'succeeded'){
+            throw new Error('Payment was not successful')
+        }
+
+        await handleConfirmingOrder(cart, req.user.uid, stripe_result);
+
+        res.status(200).send({
+            redirect_url: `/order/confirmation?order_id=${cart.order_id}&order_time=${format_date}&name=${customer.name}&estimate=${15}&item_count=${cart.cart_quantity}&total=${cart.total}`
+        });
+    } catch (error) {
+        res.status(400).send({ error: (error as Error).message ?? 'Failed to process payment with id'})
+    }
+}
+
+// confirm the order after the payment is successful
+export const usePaymentIntent = async (req: Request, res: Response) => {
     try {
         let s_id = req.cookies.s_id;
         let cart = req.body.cart as ICart;
@@ -155,73 +196,5 @@ export const confirmOnlineOrder = async (req: Request, res: Response) => {
     }
 }
 
-export const usePaymentMethodId = async (req: Request, res: Response) => {
-    try {
-        if(!isString(req.body.card.id)){
-            throw new Error('ERR: Payment method is invalid')
-        }
-
-        validateCart(req.body.cart);
-        validateCustomer(req.body.customer);
-
-        let cart:ICart = req.body.cart;
-        let customer:ICustomer = req.body.customer;
-        let payment_method_id = req.body.card.id;
-
-        let user = (await firestore().collection('usersTest').doc(req.user.uid).get()).data() as ICustomer
-
-        if(!user) {
-            throw new Error('ERR: No user found')
-        }
-
-        let stripe_result = await stripe.paymentIntents.create({
-            amount: Number((cart.total * 100).toFixed(0)),
-            currency: 'usd',
-            customer: user.billings.stripe_customer_id,
-            payment_method: payment_method_id,
-            confirm: true,
-        })
-
-        if(stripe_result.status !== 'succeeded'){
-            throw new Error('Payment was not successful')
-        }
-
-        // handle the rewards
-
-        let order:IFirestoreOrder |  {} = {
-            payment: {
-                payment_intent_id: stripe_result.id,
-            },
-            date: {
-                month: date.month,
-                day: date.day,
-                year: date.year,
-            },
-            summary: {
-                subtotal: cart.subtotal,
-                original_subtotal: cart.original_subtotal,
-                tax: cart.tax,
-                tip: cart.tip,
-                tip_type: cart.tip_type,
-                total: cart.total,
-            },
-            created_at: timestamp,
-            status: 'completed'
-        }
-
-        // at this point, the order is already in the database and the payment is successful
-        await firestore().collection('orderTest').doc(cart.order_id).set(order, { merge: true })
-
-        res.status(200).send({
-            order_id: cart.order_id,
-            order_time: format_date,
-            estimate: 15, 
-            item_count: cart.cart_quantity,
-            total: cart.total
-        });
-    } catch (error) {
-        res.status(400).send({ error: (error as Error).message ?? 'Failed to process payment with id'})
-    }
-}
 
 
