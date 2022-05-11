@@ -127,13 +127,19 @@ export const confirmOnlineOrder = async (req: Request, res: Response) => {
         let cart = req.body.cart as ICart;
         let customer_name = req.body.customer_name;
 
+
+        // check if the cookie contain s_id, 
         if(isEmpty(s_id)){
             throw new Error('Unable to find the s_id, please refresh the payment page')
         }
+
+        // validate the cart 
         validateCart(cart);
 
-        await handleConfirmingOrder(s_id, cart)
+        // handle confirming the order in firestore
+        await handleConfirmingOrder(s_id, cart, req.user.uid)
 
+        // clear the s_id cookie once everything is successful
         res.clearCookie('s_id');
 
         res.status(200).send({

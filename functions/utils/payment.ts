@@ -12,34 +12,30 @@ interface IPlaceOrder {
 }
 
 interface IHandleRewardPointCalculation {
-    subtotal: number,
-    point_redemption: number,
-    reward_point: number, 
-    transactions: IRewardTransaction[],
-    order_id: string,
-    created_at: number,
+    cart: ICart,
+    customer:ICustomer,
 }
 const handleRewardPointCalculation = (_: IHandleRewardPointCalculation) => {
         /*
             calculate how much point should be reward to the user
             ex: subtotal: $100, will result in 100 * 2, which is 200 point = $2 at time of redemption
          */ 
-        let reward = Math.round(_.subtotal * Number(process.env.REWARD_PERCENTAGE));
+        let reward = Math.round(_.cart.subtotal * Number(process.env.REWARD_PERCENTAGE));
 
         // the new point will be the old points minus the amount redeem plus the reward for this order
-        let updated_reward_point = _.reward_point - _.point_redemption + reward; // original point minus the redeem amount plus the new reward amount
-        let updated_reward_transactions = _.transactions;
+        let updated_reward_point = _.customer.reward.points - _.cart.point_redemption + reward; // original point minus the redeem amount plus the new reward amount
+        let updated_reward_transactions = _.customer.reward.transactions;
         
         /*
             if point_redemption is greater than 0, it means that the customer made a redemption,
             we will want to create an new transaction object and unshift it into the transaction array
         */
-        if(_.point_redemption > 0){
+        if(_.cart.point_redemption > 0){
             updated_reward_transactions.unshift({
                 type: TransactionType.redeem,
-                amount: _.point_redemption,
-                order_id: _.order_id,
-                created_at: _.created_at,
+                amount: _.cart.point_redemption,
+                order_id: _.cart.order_id,
+                created_at: timestamp,
             });
         }
         
@@ -47,8 +43,8 @@ const handleRewardPointCalculation = (_: IHandleRewardPointCalculation) => {
         updated_reward_transactions.unshift({
             type: TransactionType.reward,
             amount: reward,
-            order_id: _.order_id, 
-            created_at: _.created_at,
+            order_id: _.cart.order_id, 
+            created_at: timestamp,
         });
 
         return {
@@ -69,12 +65,7 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_in
         }
 
         let { updated_reward_point, updated_reward_transactions, reward_earned} = handleRewardPointCalculation({
-            subtotal: cart.subtotal,
-            point_redemption: cart.point_redemption,
-            reward_point: user.reward.points, 
-            transactions: user.reward.transactions,
-            order_id: cart.order_id,
-            created_at: timestamp,
+            cart, customer
         })
 
         transaction.update(user_ref, {
@@ -232,38 +223,53 @@ export const getCustomerId = async (uid: string, email: string | undefined) => {
     return customer_id
 }
 
-export const handleConfirmingOrder = async (s_id: string, cart:ICart) => {
-    let payment_intent = retrieveIntentFromCookie(s_id)
-    let intent = await stripe.paymentIntents.retrieve(payment_intent);
-    if(intent.status !== 'succeeded'){
-        throw new Error('Payment was not successful')
-    }
+export const handleConfirmingOrder = async (s_id: string, cart:ICart, user_id: string) => {
+    await firestore().runTransaction(async (transaction) => {
+        const user_ref = firestore().collection('usersTest').doc(user_id)
+        const order_ref = firestore().collection('orderTest').doc(cart.order_id);
 
-    let order:IFirestoreOrder |  {} = {
-        payment: {
-            payment_intent_id: intent.id,
-        },
-        date: {
-            month: date.month,
-            day: date.day,
-            year: date.year,
-        },
-        summary: {
-            subtotal: cart.subtotal,
-            original_subtotal: cart.original_subtotal,
-            tax: cart.tax,
-            tip: cart.tip,
-            tip_type: cart.tip_type,
-            total: cart.total,
-        },
-        created_at: timestamp,
-        status: 'completed'
-    }
+        const customer = (await transaction.get(user_ref)).data() as ICustomer;
 
-    // handle the rewards
+        const payment_intent = retrieveIntentFromCookie(s_id)
+        const intent = await stripe.paymentIntents.retrieve(payment_intent);
+        if(intent.status !== 'succeeded'){
+            throw new Error('Payment was not successful')
+        }
+        const { updated_reward_point, updated_reward_transactions, reward_earned} = handleRewardPointCalculation({cart, customer});
 
-    // at this point, the order is already in the database and the payment is successful
-    await firestore().collection('orderTest').doc(cart.order_id).set(order, { merge: true })
+        transaction.update(user_ref, {
+            reward: {
+                points: updated_reward_point,
+                transactions: updated_reward_transactions,
+            }
+        })
+ 
+        // at this point, the order is already in the database and the payment is successful
+        transaction.set(order_ref, {
+            payment: {
+                payment_intent_id: intent.id,
+            },
+            date: {
+                month: date.month,
+                day: date.day,
+                year: date.year,
+            },
+            summary: {
+                subtotal: cart.subtotal,
+                original_subtotal: cart.original_subtotal,
+                tax: cart.tax,
+                tip: cart.tip,
+                tip_type: cart.tip_type,
+                total: cart.total,
+            },
+            points: {
+                reward: reward_earned, 
+                point_redemption: cart.point_redemption,
+            },
+            created_at: timestamp,
+            status: 'completed'
+        } as IFirestoreOrder | {}, { merge: true })
+    })
 }
 
 // STRIPE RELATED
