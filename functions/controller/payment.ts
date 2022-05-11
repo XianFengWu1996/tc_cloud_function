@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Stripe from "stripe";
 import { validateCart, validateCustomer } from "../utils/validateData";
-import { createPaymentIntent, generatePublicPaymentList, getCustomerId, handlePlaceCashOrder, handlePlaceOnlineOrder, retrieveIntentFromCookie } from '../utils/payment'
+import { createPaymentIntent, generatePublicPaymentList, getCustomerId, handleConfirmingOrder, handlePlaceCashOrder, handlePlaceOnlineOrder, retrieveIntentFromCookie } from '../utils/payment'
 import { firestore } from "firebase-admin";
 import { isBoolean, isEmpty, isNumber, isString } from "lodash";
 import { date, format_date, timestamp } from "../utils/time";
@@ -132,45 +132,12 @@ export const confirmOnlineOrder = async (req: Request, res: Response) => {
         }
         validateCart(cart);
 
-
-        let payment_intent = retrieveIntentFromCookie(s_id)
-
-        let intent = await stripe.paymentIntents.retrieve(payment_intent);
-
-        if(intent.status !== 'succeeded'){
-            throw new Error('Payment was not successful')
-        }
-
-        let order:IFirestoreOrder |  {} = {
-            payment: {
-                payment_intent_id: intent.id,
-            },
-            date: {
-                month: date.month,
-                day: date.day,
-                year: date.year,
-            },
-            summary: {
-                subtotal: cart.subtotal,
-                original_subtotal: cart.original_subtotal,
-                tax: cart.tax,
-                tip: cart.tip,
-                tip_type: cart.tip_type,
-                total: cart.total,
-            },
-            created_at: timestamp,
-            status: 'completed'
-        }
-
-        // handle the rewards
-
-        // at this point, the order is already in the database and the payment is successful
-        await firestore().collection('orderTest').doc(cart.order_id).set(order, { merge: true })
+        await handleConfirmingOrder(s_id, cart)
 
         res.clearCookie('s_id');
 
         res.status(200).send({
-            redirect_url: `order/confirmation?order_id=${cart.order_id}&order_time=${format_date}&name=${customer_name}&estimate=${15}&item_count=${cart.cart_quantity}&total=${cart.total}`
+            redirect_url: `/order/confirmation?order_id=${cart.order_id}&order_time=${format_date}&name=${customer_name}&estimate=${15}&item_count=${cart.cart_quantity}&total=${cart.total}`
         });
     
     } catch (error) {

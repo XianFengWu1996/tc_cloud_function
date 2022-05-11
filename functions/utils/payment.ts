@@ -232,6 +232,40 @@ export const getCustomerId = async (uid: string, email: string | undefined) => {
     return customer_id
 }
 
+export const handleConfirmingOrder = async (s_id: string, cart:ICart) => {
+    let payment_intent = retrieveIntentFromCookie(s_id)
+    let intent = await stripe.paymentIntents.retrieve(payment_intent);
+    if(intent.status !== 'succeeded'){
+        throw new Error('Payment was not successful')
+    }
+
+    let order:IFirestoreOrder |  {} = {
+        payment: {
+            payment_intent_id: intent.id,
+        },
+        date: {
+            month: date.month,
+            day: date.day,
+            year: date.year,
+        },
+        summary: {
+            subtotal: cart.subtotal,
+            original_subtotal: cart.original_subtotal,
+            tax: cart.tax,
+            tip: cart.tip,
+            tip_type: cart.tip_type,
+            total: cart.total,
+        },
+        created_at: timestamp,
+        status: 'completed'
+    }
+
+    // handle the rewards
+
+    // at this point, the order is already in the database and the payment is successful
+    await firestore().collection('orderTest').doc(cart.order_id).set(order, { merge: true })
+}
+
 // STRIPE RELATED
 
 export const createPaymentIntent = async (req: Request, res: Response, customer_id: string) => {
