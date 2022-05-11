@@ -4,7 +4,8 @@ import { validateCart, validateCustomer } from "../utils/validateData";
 import { createPaymentIntent, generatePublicPaymentList, getCustomerId, handlePlaceCashOrder, handlePlaceOnlineOrder, retrieveIntentFromCookie } from '../utils/payment'
 import { firestore } from "firebase-admin";
 import { isBoolean, isEmpty, isNumber, isString } from "lodash";
-import { date, timestamp } from "../utils/time";
+import { date, format_date, timestamp } from "../utils/time";
+import { format } from "path/posix";
 
 
 export const stripe = new Stripe('sk_test_zXSjQbIUWTqONah6drD5oFvC00islas5P7', {
@@ -124,6 +125,7 @@ export const confirmOnlineOrder = async (req: Request, res: Response) => {
     try {
         let s_id = req.cookies.s_id;
         let cart = req.body.cart as ICart;
+        let customer_name = req.body.customer_name;
 
         if(isEmpty(s_id)){
             throw new Error('Unable to find the s_id, please refresh the payment page')
@@ -160,19 +162,15 @@ export const confirmOnlineOrder = async (req: Request, res: Response) => {
             status: 'completed'
         }
 
+        // handle the rewards
+
         // at this point, the order is already in the database and the payment is successful
         await firestore().collection('orderTest').doc(cart.order_id).set(order, { merge: true })
-
-        const format_date = date.toFormat('DDD T')
 
         res.clearCookie('s_id');
 
         res.status(200).send({
-            order_id: cart.order_id,
-            order_time: format_date,
-            estimate: 15, 
-            item_count: cart.cart_quantity,
-            total: cart.total
+            redirect_url: `order/confirmation?order_id=${cart.order_id}&order_time=${format_date}&name=${customer_name}&estimate=${15}&item_count=${cart.cart_quantity}&total=${cart.total}`
         });
     
     } catch (error) {
@@ -187,33 +185,63 @@ export const usePaymentMethodId = async (req: Request, res: Response) => {
             throw new Error('ERR: Payment method is invalid')
         }
 
-        if(!isNumber(req.body.total)){
-            throw new Error('ERR: Total is required')
-        }
+        validateCart(req.body.cart);
+        validateCustomer(req.body.customer);
 
-        let total: number = req.body.total;
+        let cart:ICart = req.body.cart;
+        let customer:ICustomer = req.body.customer;
         let payment_method_id = req.body.card.id;
 
-        let user_ref = firestore().collection('usersTest').doc(req.user.uid);
-
-        let user = (await user_ref.get()).data() as ICustomer;
+        let user = (await firestore().collection('usersTest').doc(req.user.uid).get()).data() as ICustomer
 
         if(!user) {
             throw new Error('ERR: No user found')
         }
 
         let stripe_result = await stripe.paymentIntents.create({
-            amount: Number((total * 100).toFixed(0)),
+            amount: Number((cart.total * 100).toFixed(0)),
             currency: 'usd',
             customer: user.billings.stripe_customer_id,
             payment_method: payment_method_id,
             confirm: true,
         })
 
-        res.clearCookie('s_id')
+        if(stripe_result.status !== 'succeeded'){
+            throw new Error('Payment was not successful')
+        }
 
-        res.send({
-            payment_intent: stripe_result.id,
+        // handle the rewards
+
+        let order:IFirestoreOrder |  {} = {
+            payment: {
+                payment_intent_id: stripe_result.id,
+            },
+            date: {
+                month: date.month,
+                day: date.day,
+                year: date.year,
+            },
+            summary: {
+                subtotal: cart.subtotal,
+                original_subtotal: cart.original_subtotal,
+                tax: cart.tax,
+                tip: cart.tip,
+                tip_type: cart.tip_type,
+                total: cart.total,
+            },
+            created_at: timestamp,
+            status: 'completed'
+        }
+
+        // at this point, the order is already in the database and the payment is successful
+        await firestore().collection('orderTest').doc(cart.order_id).set(order, { merge: true })
+
+        res.status(200).send({
+            order_id: cart.order_id,
+            order_time: format_date,
+            estimate: 15, 
+            item_count: cart.cart_quantity,
+            total: cart.total
         });
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to process payment with id'})
