@@ -55,7 +55,7 @@ const handleRewardPointCalculation = (_: IHandleRewardPointCalculation) => {
         }
 }
 
-export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_intent_id}: IPlaceOrder) => {
+export const handlePlaceCashOrder = async ({ user_id, cart, customer}: IPlaceOrder) => {
     await firestore().runTransaction(async transaction => {
         let order_ref = firestore().collection('orderTest').doc(cart.order_id);
         let user_ref = firestore().collection('usersTest').doc(user_id)
@@ -85,7 +85,7 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer, payment_in
             },
             payment: {
                 payment_type: cart.payment_type,
-                payment_intent_id: payment_intent_id,
+                payment_intent_id: '',
                 customer_id: user.billings.stripe_customer_id,
             },
             items: cart.cart,

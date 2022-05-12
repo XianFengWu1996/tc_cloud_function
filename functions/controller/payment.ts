@@ -103,9 +103,12 @@ export const placeOnlineOrder =  async (req: Request, res: Response) => {
 // place the order since it does not require payment
 export const placeCashOrder = async (req: Request, res: Response) => {
     try {
+        const customer = req.body.customer as ICustomer;
+        const cart = req.body.cart as ICart;
+
          // validate all the data
-         validateCustomer(req.body.customer);
-         validateCart(req.body.cart);
+         validateCustomer(customer);
+         validateCart(cart);
 
         // place the order to firestore
         await handlePlaceCashOrder({ 
@@ -115,7 +118,9 @@ export const placeCashOrder = async (req: Request, res: Response) => {
             payment_intent_id: '',
         })
 
-        res.status(200).send();
+        res.status(200).send({
+            redirect_url: `/order/confirmation?order_id=${cart.order_id}&order_time=${format_date}&name=${customer.name}&estimate=${15}&item_count=${cart.cart_quantity}&total=${cart.total}`
+        });
     } catch (error) {
         console.log(error)
         res.status(400).send({ error: (error as Error).message ?? 'Failed to submit order' })
