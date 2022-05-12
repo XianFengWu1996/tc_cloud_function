@@ -3,7 +3,7 @@ import axios from 'axios';
 import { logger } from '../utils/logger'
 import { v4 } from 'uuid' 
 import { firestore } from 'firebase-admin'
-import { addMinutesToTimestamp, hasExpire } from "../utils/time";
+import { addMinutesTounix_timestamp, hasExpire } from "../utils/time";
 import { isEmpty, isEqual } from "lodash";
 import { checkForValidPhoneNumber } from "../utils/validateData";
 
@@ -44,7 +44,7 @@ export const sendMessage = async (req: Request, res: Response) => {
         await firestore().collection('/sms_verification').doc(c_id).set({
             c_id, 
             code,
-            expiration: addMinutesToTimestamp(15),
+            expiration: addMinutesTounix_timestamp(15),
             phone_num,
         })
 

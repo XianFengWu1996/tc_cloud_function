@@ -3,12 +3,11 @@ import { firestore } from "firebase-admin"
 import { isEmpty, isString } from "lodash";
 import Stripe from "stripe";
 import { stripe } from "../controller/payment";
-import { date, timestamp } from "./time";
+import { format_date } from "./time";
 
 interface IPlaceOrder {
     user_id: string,
     cart: ICart,
-    customer: ICustomer,
     payment_intent_id: string,
 }
 
@@ -17,6 +16,8 @@ interface IHandleRewardPointCalculation {
     customer:ICustomer,
 }
 const handleRewardPointCalculation = (_: IHandleRewardPointCalculation) => {
+        const { timestamp } = format_date();
+
         /*
             calculate how much point should be reward to the user
             ex: subtotal: $100, will result in 100 * 2, which is 200 point = $2 at time of redemption
@@ -55,13 +56,16 @@ const handleRewardPointCalculation = (_: IHandleRewardPointCalculation) => {
         }
 }
 
-export const handlePlaceCashOrder = async ({ user_id, cart, customer}: IPlaceOrder) => {
+export const handlePlaceCashOrder = async ({ user_id, cart}: IPlaceOrder) => {
+    let customer = {} as ICustomer;
+    const { timestamp, date } = format_date();
+
     await firestore().runTransaction(async transaction => {
         let order_ref = firestore().collection('orderTest').doc(cart.order_id);
         let user_ref = firestore().collection('usersTest').doc(user_id)
 
-        let user = (await transaction.get(user_ref)).data() as ICustomer
-        if(!user){
+        customer = (await transaction.get(user_ref)).data() as ICustomer
+        if(!customer){
             throw new Error('User data not found')
         }
 
@@ -76,7 +80,7 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer}: IPlaceOrd
             }
         })
 
-        let order: IFirestoreOrder = {
+        transaction.set(order_ref, {
             order_id: cart.order_id,
             user: {
                 user_id: user_id,
@@ -86,7 +90,7 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer}: IPlaceOrd
             payment: {
                 payment_type: cart.payment_type,
                 payment_intent_id: '',
-                customer_id: user.billings.stripe_customer_id,
+                customer_id: customer.billings.stripe_customer_id,
             },
             items: cart.cart,
             summary: {
@@ -126,13 +130,17 @@ export const handlePlaceCashOrder = async ({ user_id, cart, customer}: IPlaceOrd
             },
             created_at: timestamp,
             status: 'completed',
-        }
-
-        transaction.set(order_ref, order, { merge: true})            
+        } as IFirestoreOrder, { merge: true})            
     })
+
+    return {
+        customer
+    }
 } 
 
-export const handlePlaceOnlineOrder = async ({ user_id, cart, customer, payment_intent_id}: IPlaceOrder) => {
+export const handlePlaceOnlineOrder = async ({ user_id, cart, payment_intent_id}: IPlaceOrder) => {
+    const { timestamp, date } = format_date();
+
     await firestore().runTransaction(async transaction => {
         let order_ref = firestore().collection('orderTest').doc(cart.order_id);
         let user_ref = firestore().collection('usersTest').doc(user_id)
@@ -141,13 +149,13 @@ export const handlePlaceOnlineOrder = async ({ user_id, cart, customer, payment_
         if(!user){
             throw new Error('User data not found')
         }
-
-        let order: IFirestoreOrder = {
+        
+        transaction.set(order_ref, {
             order_id: cart.order_id,
             user: {
                 user_id: user_id,
-                name: customer.name,
-                phone: customer.phone,
+                name: user.name,
+                phone: user.phone,
             },
             payment: {
                 payment_type: cart.payment_type,
@@ -174,7 +182,7 @@ export const handlePlaceOnlineOrder = async ({ user_id, cart, customer, payment_
             },
             delivery: {
                 is_delivery: cart.is_delivery,
-                address: cart.is_delivery ? customer.address : null
+                address: cart.is_delivery ? user.address : null
             },
             additional_request: {
                 dont_include_utensils: cart.dont_include_utensils,
@@ -192,9 +200,7 @@ export const handlePlaceOnlineOrder = async ({ user_id, cart, customer, payment_
             },
             created_at: timestamp,
             status: 'required_payment',
-        }
-
-        transaction.set(order_ref, order, { merge: true })            
+        } as IFirestoreOrder, { merge: true })            
     })
 } 
 
@@ -226,6 +232,7 @@ export const getCustomerId = async (uid: string, email: string | undefined) => {
 
 export const handleConfirmingOrder = async (cart:ICart, user_id: string, stripe_result: Stripe.Response<Stripe.PaymentIntent>) => {
     let customer = {} as ICustomer;
+    const { date, timestamp } = format_date();
 
     await firestore().runTransaction(async (transaction) => {
         const user_ref = firestore().collection('usersTest').doc(user_id)

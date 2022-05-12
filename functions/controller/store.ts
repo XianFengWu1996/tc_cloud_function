@@ -5,7 +5,7 @@ import { checkForAdminStatus } from "./admin";
 import { createPersistentDownloadUrl } from '../utils/url'
 import { checkForValidDishData } from '../utils/validateData'
 import { v4 } from 'uuid'
-import { addMinutesToTimestamp } from "../utils/time";
+import { addMinutesTounix_timestamp } from "../utils/time";
 
 
 export const getPublicInfo = async (req: Request, res: Response, next:NextFunction) => {
@@ -18,7 +18,7 @@ export const getPublicInfo = async (req: Request, res: Response, next:NextFuncti
             special_hour: data.special_hour,
             message: data.message,
             server_is_on: data.server_is_on,
-            expiration: addMinutesToTimestamp(30)
+            expiration: addMinutesTounix_timestamp(30)
         }); 
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to get store info' });
@@ -138,7 +138,7 @@ export const getMenuData = async(req: Request, res:Response) => {
         fullday, 
         lunch, 
         special, 
-        expiration: addMinutesToTimestamp(15)
+        expiration: addMinutesTounix_timestamp(15)
     });
    } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to get menu' })
