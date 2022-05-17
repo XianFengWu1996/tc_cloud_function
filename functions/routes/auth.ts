@@ -23,6 +23,9 @@ auth.delete('/customer/phone', checkFirebaseToken,  customerController.deletePho
 
 auth.patch('/customer/name', checkFirebaseToken, customerController.updateCustomerName);
 
+// ORDER
+auth.get('/customer/order_history', checkFirebaseToken, customerController.getOrderHistory)
+
 // ADDRESS
 auth.post('/address/delivery', checkFirebaseToken, customerController.calculateDelivery)
 

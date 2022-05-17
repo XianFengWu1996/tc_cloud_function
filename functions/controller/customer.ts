@@ -141,3 +141,29 @@ export const calculateDelivery = async (req: Request, res: Response) => {
         res.status(400).send({ error: (error as Error).message ?? 'ERR: Failed to set address'})
     }
 }
+
+export const getOrderHistory =  async (req: Request, res: Response) => {
+    try {
+        let orders = (await firestore().collection('/orderTest')
+            .where('status', '==', 'completed')
+            .where('user.user_id', '==', req.user.uid)
+            // .limit(8)
+            .get())
+            .docs;
+        let order_list: any[] = [];
+        orders.map((order) => {
+            const data = order.data();
+            // remove some private info before sending to client
+            delete data.user.user_id
+            delete data.payment.customer_id
+            delete data.payment.payment_intent_id
+            delete data.status
+
+            order_list.push(data)
+        })
+
+        res.status(200).send({ order_list });
+    } catch (error) {
+        res.status(400).send({ error: (error as Error).message ?? 'ERR: Failed to get order history'})
+    }
+}
