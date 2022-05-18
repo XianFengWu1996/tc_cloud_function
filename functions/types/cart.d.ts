@@ -81,7 +81,7 @@ interface IFirestoreOrder {
         refund: {
             amount: number,
             refund_reason: string,
-        }
+        } | null
     },
     delivery: {
         is_delivery: boolean,

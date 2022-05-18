@@ -109,10 +109,7 @@ export const handlePlaceCashOrder = async ({ user_id, cart}: IPlaceOrder) => {
                 tip_type: cart.tip_type,
                 delivery_fee: cart.is_delivery ? cart.delivery_fee : 0,
                 total: cart.total,
-                refund: {
-                    amount: 0,
-                    refund_reason: ''
-                }
+                refund: null
             },
             delivery: {
                 is_delivery: cart.is_delivery,
@@ -183,10 +180,7 @@ export const handlePlaceOnlineOrder = async ({ user_id, cart, payment_intent_id}
                 tip_type: cart.tip_type,
                 delivery_fee: cart.is_delivery ? cart.delivery_fee : 0,
                 total: cart.total,
-                refund: {
-                    amount: 0,
-                    refund_reason: ''
-                }
+                refund: null
             },
             delivery: {
                 is_delivery: cart.is_delivery,
