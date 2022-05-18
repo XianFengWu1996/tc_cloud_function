@@ -70,6 +70,7 @@ interface IFirestoreOrder {
             lunch_discount: number,
             point_discount: number,
         },
+        cart_quantity: number,
         subtotal: number,
         original_subtotal: number, // need to use this to recalculate the total if we remove lunch discount
         tax: number,

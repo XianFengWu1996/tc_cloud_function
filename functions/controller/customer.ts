@@ -147,6 +147,7 @@ export const getOrderHistory =  async (req: Request, res: Response) => {
         let orders = (await firestore().collection('/orderTest')
             .where('status', '==', 'completed')
             .where('user.user_id', '==', req.user.uid)
+            .orderBy('created_at', 'desc')
             // .limit(8)
             .get())
             .docs;
@@ -164,6 +165,7 @@ export const getOrderHistory =  async (req: Request, res: Response) => {
 
         res.status(200).send({ order_list });
     } catch (error) {
+        console.log(error)
         res.status(400).send({ error: (error as Error).message ?? 'ERR: Failed to get order history'})
     }
 }

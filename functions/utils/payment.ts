@@ -98,6 +98,7 @@ export const handlePlaceCashOrder = async ({ user_id, cart}: IPlaceOrder) => {
                     lunch_discount: cart.lunch_discount,
                     point_discount: Number((cart.point_redemption / 100).toFixed(2))
                 },
+                cart_quantity: cart.cart_quantity,
                 subtotal: cart.subtotal,
                 original_subtotal: cart.original_subtotal,
                 tax: cart.tax,
