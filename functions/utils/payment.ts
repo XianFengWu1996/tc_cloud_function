@@ -175,6 +175,7 @@ export const handlePlaceOnlineOrder = async ({ user_id, cart, payment_intent_id}
                     lunch_discount: cart.lunch_discount,
                     point_discount: Number((cart.point_redemption / 100).toFixed(2))
                 },
+                cart_quantity: cart.cart_quantity,
                 subtotal: cart.subtotal,
                 original_subtotal: cart.original_subtotal,
                 tax: cart.tax,
@@ -280,6 +281,7 @@ export const handleConfirmingOrder = async (cart:ICart, user_id: string, stripe_
             },
             summary: {
                 subtotal: cart.subtotal,
+                cart_quantity: cart.cart_quantity,
                 original_subtotal: cart.original_subtotal,
                 tax: cart.tax,
                 tip: cart.tip,
