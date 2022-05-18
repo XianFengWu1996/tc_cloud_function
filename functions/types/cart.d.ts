@@ -106,7 +106,8 @@ interface IFirestoreOrder {
                 last_4: string,
                 country: string,
             }
-        } | null
+        } | null,
+        payment_status: 'completed' | 'required_payment',
     },
     date: {
         month: number,
@@ -117,7 +118,7 @@ interface IFirestoreOrder {
         reward: number,
         point_redemption: number,
     },
-    status: 'completed' | 'required_payment',
+    order_status: 'required_payment' | 'required_confirmation' | 'confirmed' | 'ready' | 'complete' 
     created_at: number
     
 }

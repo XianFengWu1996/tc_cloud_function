@@ -145,7 +145,7 @@ export const calculateDelivery = async (req: Request, res: Response) => {
 export const getOrderHistory =  async (req: Request, res: Response) => {
     try {
         let orders = (await firestore().collection('/orderTest')
-            .where('status', '==', 'completed')
+            .where('payment.payment_status', '==', 'completed')
             .where('user.user_id', '==', req.user.uid)
             .orderBy('created_at', 'desc')
             // .limit(8)
@@ -153,12 +153,16 @@ export const getOrderHistory =  async (req: Request, res: Response) => {
             .docs;
         let order_list: any[] = [];
         orders.map((order) => {
-            const data = order.data();
+            const data = order.data() ;
+            
             // remove some private info before sending to client
             delete data.user.user_id
             delete data.payment.customer_id
-            delete data.payment.payment_intent_id
-            delete data.status
+            delete data.payment.stripe?.payment_intent_id,
+            delete data.payment.stripe?.payment_method,
+            delete data.payment.stripe?.payment_method_type,
+            delete data.payment.payment_status
+            delete data.order_status
 
             order_list.push(data)
         })

@@ -92,7 +92,8 @@ export const handlePlaceCashOrder = async ({ user_id, cart}: IPlaceOrder) => {
                 customer_id: customer.billings.stripe_customer_id,
                 stripe: {
                     payment_intent_id: '',
-                }
+                },
+                payment_status: 'completed'
             },
             items: cart.cart,
             summary: {
@@ -132,7 +133,7 @@ export const handlePlaceCashOrder = async ({ user_id, cart}: IPlaceOrder) => {
                 point_redemption: cart.point_redemption
             },
             created_at: timestamp,
-            status: 'completed',
+            order_status: 'required_confirmation'
         } as IFirestoreOrder, { merge: true})            
     })
 
@@ -165,7 +166,8 @@ export const handlePlaceOnlineOrder = async ({ user_id, cart, payment_intent_id}
                 customer_id: user.billings.stripe_customer_id,
                 stripe: {
                     payment_intent_id: payment_intent_id,
-                }
+                },
+                payment_status: 'required_payment'
             },
             items: cart.cart,
             summary: {
@@ -203,8 +205,8 @@ export const handlePlaceOnlineOrder = async ({ user_id, cart, payment_intent_id}
                 reward: 0,
                 point_redemption: cart.point_redemption
             },
+            order_status: 'required_payment',
             created_at: timestamp,
-            status: 'required_payment',
         } as IFirestoreOrder, { merge: true })            
     })
 } 
@@ -268,7 +270,8 @@ export const handleConfirmingOrder = async (cart:ICart, user_id: string, stripe_
                         last_4: stripe_result.charges.data[0].payment_method_details?.card.last4,
                         country: stripe_result.charges.data[0].payment_method_details?.card.country,
                     } : null
-                }
+                },
+                payment_status: 'completed'
             },
             date: {
                 month: date.month,
@@ -287,8 +290,8 @@ export const handleConfirmingOrder = async (cart:ICart, user_id: string, stripe_
                 reward: reward_earned, 
                 point_redemption: cart.point_redemption,
             },
+            order_status: 'required_confirmation',
             created_at: timestamp,
-            status: 'completed'
         } as IFirestoreOrder | {}, { merge: true })
     })
 
