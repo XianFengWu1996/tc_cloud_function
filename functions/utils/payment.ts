@@ -89,8 +89,10 @@ export const handlePlaceCashOrder = async ({ user_id, cart}: IPlaceOrder) => {
             },
             payment: {
                 payment_type: cart.payment_type,
-                payment_intent_id: '',
                 customer_id: customer.billings.stripe_customer_id,
+                stripe: {
+                    payment_intent_id: '',
+                }
             },
             items: cart.cart,
             summary: {
@@ -160,8 +162,10 @@ export const handlePlaceOnlineOrder = async ({ user_id, cart, payment_intent_id}
             },
             payment: {
                 payment_type: cart.payment_type,
-                payment_intent_id: payment_intent_id,
                 customer_id: user.billings.stripe_customer_id,
+                stripe: {
+                    payment_intent_id: payment_intent_id,
+                }
             },
             items: cart.cart,
             summary: {
@@ -253,7 +257,18 @@ export const handleConfirmingOrder = async (cart:ICart, user_id: string, stripe_
         // at this point, the order is already in the database and the payment is successful
         transaction.set(order_ref, {
             payment: {
-                payment_intent_id: stripe_result.id
+                stripe: {
+                    payment_intent_id: stripe_result.id,
+                    payment_method: stripe_result.payment_method,
+                    payment_method_type: stripe_result.charges.data[0].payment_method_details?.type,
+                    card: stripe_result.charges.data[0].payment_method_details?.card ? {
+                        brand: stripe_result.charges.data[0].payment_method_details?.card.brand,
+                        exp_month: stripe_result.charges.data[0].payment_method_details?.card.exp_month,
+                        exp_year: stripe_result.charges.data[0].payment_method_details?.card.exp_year,
+                        last_4: stripe_result.charges.data[0].payment_method_details?.card.last4,
+                        country: stripe_result.charges.data[0].payment_method_details?.card.country,
+                    } : null
+                }
             },
             date: {
                 month: date.month,

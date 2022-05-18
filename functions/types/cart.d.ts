@@ -94,8 +94,19 @@ interface IFirestoreOrder {
     }
     payment: {
         payment_type: string,
-        payment_intent_id: string,
         customer_id: string,
+        stripe: {
+            payment_intent_id: string,
+            payment_method: string,
+            payment_method_type: string,
+            card: {
+                brand: string,
+                exp_month: number,
+                exp_year: number,
+                last_4: string,
+                country: string,
+            }
+        } | null
     },
     date: {
         month: number,
