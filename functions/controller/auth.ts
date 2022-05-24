@@ -4,13 +4,12 @@ import { isEmpty} from 'lodash';
 
 export const Signin = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // sync old data to the new doc
         await admin.firestore().runTransaction(async (transaction) => {
             const user_ref = admin.firestore().collection('/usersTest').doc(req.user.uid);
             let user_data = (await transaction.get(user_ref)).data();
             
 
-            // if the user doc (new doc) does not exist
+            // sync old data to the new doc
             if(isEmpty(user_data)){
                 let old_user = (await transaction.get(user_ref.collection('customer').doc('details'))).data();
                 let old_reward = (await transaction.get(user_ref.collection('rewards').doc('points'))).data();
@@ -40,6 +39,8 @@ export const Signin = async (req: Request, res: Response, next: NextFunction) =>
                     },
                 })       
             }
+
+          
         })
 
         res.status(200).send();
