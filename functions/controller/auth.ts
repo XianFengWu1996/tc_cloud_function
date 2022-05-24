@@ -40,7 +40,31 @@ export const Signin = async (req: Request, res: Response, next: NextFunction) =>
                 })       
             }
 
-            
+              // if user collection does not exist
+              if(!user_data){
+                transaction.set(user_ref, {
+                    name: '',
+                    phone: '',
+                    phone_list: [],
+                    address: {
+                        address: '',
+                        street: '',
+                        city: '',
+                        state: '',
+                        zipcode: '',
+                        business: '',
+                        apt: '',
+                        delivery_fee: 0,
+                    },
+                    reward: {
+                        points: 0,
+                        transactions: []
+                    },
+                    billings: {
+                        stripe_customer_id: '',
+                    }                
+                } as ICustomer)
+            }
           
         })
 
