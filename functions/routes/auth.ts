@@ -26,6 +26,9 @@ auth.patch('/customer/name', checkFirebaseToken, customerController.updateCustom
 // ORDER
 auth.get('/customer/order_history', checkFirebaseToken, customerController.getOrderHistory)
 
+auth.get('/customer/reward_history', checkFirebaseToken, customerController.getRewardHistory)
+
+
 // ADDRESS
 auth.post('/address/delivery', checkFirebaseToken, customerController.calculateDelivery)
 

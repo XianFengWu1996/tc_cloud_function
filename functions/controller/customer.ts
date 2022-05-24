@@ -173,3 +173,14 @@ export const getOrderHistory =  async (req: Request, res: Response) => {
         res.status(400).send({ error: (error as Error).message ?? 'ERR: Failed to get order history'})
     }
 }
+
+export const getRewardHistory = async (req: Request, res: Response) => {
+    try {
+        let user_data = (await firestore().collection('usersTest').doc(req.user.uid).get()).data() as ICustomer;
+
+        res.status(200).send({ rewards: user_data.reward });
+    } catch (error) {
+        console.log(error)
+        res.status(400).send({ error: (error as Error).message ?? 'ERR: Failed to get order history'})
+    }
+}
