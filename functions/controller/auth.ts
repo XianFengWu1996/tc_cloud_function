@@ -17,7 +17,6 @@ export const Signin = async (req: Request, res: Response, next: NextFunction) =>
                 transaction.set(user_ref, {
                     name: old_user?.customer.name  ? old_user.customer.name :'',
                     phone: old_user?.customer.phone ? old_user.customer.phone : '',
-                    phone_list: old_user?.verifiedNumbers ? old_user.verifiedNumbers : [],
                     address: {
                         address: old_user?.address.address ? old_user?.address.address : '',
                         street:  '',
@@ -45,7 +44,6 @@ export const Signin = async (req: Request, res: Response, next: NextFunction) =>
                 transaction.set(user_ref, {
                     name: '',
                     phone: '',
-                    phone_list: [],
                     address: {
                         address: '',
                         street: '',

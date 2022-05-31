@@ -12,7 +12,6 @@ declare global {
     interface ICustomer {
         name: string,
         phone: string,
-        phone_list: string[],
         address: IAddress,
         reward: {
             points: number,
