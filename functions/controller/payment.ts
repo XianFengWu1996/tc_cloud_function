@@ -39,6 +39,18 @@ export const getSavedPaymentList = async ( req: Request, res: Response) => {
     }
 }
 
+export const deletePaymentMethod = async (req: Request, res: Response) => {
+    try {
+        if(!req.body.payment_method_id){
+            throw new Error('Missing field')
+        }
+
+        await stripe.paymentMethods.detach(req.body.payment_method_id);
+    } catch (error) {
+        res.status(400).send({ error: (error as Error).message ?? 'Failed to delete payment method'})
+    }
+}
+
 // update the intent before confirming the intent
 export const updatePaymentIntent  = async(req: Request, res: Response) => {
     try {

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { checkForValidAddress, checkForValidPhoneNumber } from '../utils/validateData'
+import { checkForValidAddress } from '../utils/validateData'
 import { firestore } from 'firebase-admin'
 import axios from "axios";
 
