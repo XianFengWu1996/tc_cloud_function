@@ -46,6 +46,7 @@ export const deletePaymentMethod = async (req: Request, res: Response) => {
         }
 
         await stripe.paymentMethods.detach(req.body.payment_method_id);
+        res.status(200).send();
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to delete payment method'})
     }
