@@ -14,6 +14,8 @@ auth.post('/message/send', checkFirebaseToken, messageController.sendMessage);
 
 auth.post('/message/verify', checkFirebaseToken, messageController.verifyCode);
 
+auth.get('/email/confirmation', messageController.sendContactMessage);
+
 // CUSTOMER
 auth.get('/customer', checkFirebaseToken, customerController.getCustomerInfo);
 
@@ -27,8 +29,5 @@ auth.get('/customer/reward_history', checkFirebaseToken, customerController.getR
 
 // ADDRESS
 auth.post('/address/delivery', checkFirebaseToken, customerController.calculateDelivery)
-
-
-
 
 export default auth
