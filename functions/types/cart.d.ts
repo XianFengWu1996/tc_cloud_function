@@ -93,7 +93,7 @@ interface IFirestoreOrder {
         schedule_time: string,
     }
     payment: {
-        payment_type: string,
+        payment_type: 'online' | 'instore' | 'cash',
         customer_id: string,
         stripe: {
             payment_intent_id: string,
