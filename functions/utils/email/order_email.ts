@@ -491,7 +491,7 @@ export const generateOrderEmailHTML = (_: IFirestoreOrder) => {
     </tr>
     </tbody>
     </table>
-    <div style="font-size:16px;padding-left:30px;text-align:center;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif">
+    <div style="font-size:16px;padding-left:15px; padding-right:15px;text-align:center;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif">
     <table style="width: 100%; border-color: transparent; border-spacing: 10px; padding-left: 2%;">
     <tbody>
     <tr>
@@ -499,7 +499,20 @@ export const generateOrderEmailHTML = (_: IFirestoreOrder) => {
     <th style="text-align: left">Quantity</th>
     <th style="text-align: left">Total</th>
     </tr>
-    {{{items}}}
+    ${
+        _.items.map((item) => {
+            return `<tr style="padding">
+                <td style="text-align: left;width:60%">
+                <p style="font-size: 15px;">${item.dish.label_id}. ${item.dish.en_name} ${item.dish.ch_name}</p>
+                ${item.option ? `<p style="font-size: 13px; color: #848484">Option:${item.option.en_name} ${item.option.ch_name} +$${item.option.price.toFixed(2)}</p>` : '<div></div>'}
+                <p style="font-size: 13px; color: #848484">$${item.dish.price.toFixed(2)}</p>
+
+                </td>
+                <td style="text-align: left; padding-top: 15px; font-size: 15px">X${item.quantity}</td>
+                <td style="text-align: left; padding-top: 15px; font-size: 15px">$${item.total.toFixed(2)}</td>
+            </tr>`
+        })
+    }
     </tbody>
     </table>
     </div>
