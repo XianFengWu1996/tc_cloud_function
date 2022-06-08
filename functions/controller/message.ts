@@ -124,29 +124,29 @@ export const verifyCode = async (req: Request, res: Response) => {
 export const sendContactMessage = async (req: Request, res: Response) => {
     try {
 
-        const app_password = 'lzcufifwxzzrqoog'
+        // const app_password = 'lzcufifwxzzrqoog'
 
-        let transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587,
-            secure: false, // true for 465, false for other ports
-            auth: {
-              user: 'taipeicuisine68@gmail.com', // generated ethereal user
-              pass: app_password, // generated ethereal password
-            },
-          });
+        // let transporter = nodemailer.createTransport({
+        //     host: "smtp.gmail.com",
+        //     port: 587,
+        //     secure: false, // true for 465, false for other ports
+        //     auth: {
+        //       user: 'taipeicuisine68@gmail.com', // generated ethereal user
+        //       pass: app_password, // generated ethereal password
+        //     },
+        //   });
 
-          await transporter.sendMail({
-            from: '"TAIPEI CUISINE 台北风味"<taipeicuisine68@gmail.com>', // sender address
-            to: "shawnwu1996@gmail.com", // list of receivers
-            subject: "Order Confirmation", // Subject line
-            html: generateOrderEmailHTML({
-                customer_name: 'xian feng wu',
-                is_delivery: true,
-                payment_method: 'In Store',
-                customer_phone: '9175787352',
-            }),
-          })
+        //   await transporter.sendMail({
+        //     from: '"TAIPEI CUISINE 台北风味"<taipeicuisine68@gmail.com>', // sender address
+        //     to: "shawnwu1996@gmail.com", // list of receivers
+        //     subject: "Order Confirmation", // Subject line
+        //     html: generateOrderEmailHTML({
+        //         customer_name: 'xian feng wu',
+        //         is_delivery: true,
+        //         payment_method: 'In Store',
+        //         customer_phone: '9175787352',
+        //     }),
+        //   })
         
 
         res.send();

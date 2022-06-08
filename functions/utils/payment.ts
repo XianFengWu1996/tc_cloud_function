@@ -4,6 +4,9 @@ import { isEmpty, isString } from "lodash";
 import Stripe from "stripe";
 import { stripe } from "../controller/payment";
 import { format_date } from "./time";
+import nodemailer from 'nodemailer'
+import { generateOrderEmailHTML } from "./email/order_email";
+
 
 interface IPlaceOrder {
     user_id: string,
@@ -80,7 +83,7 @@ export const handlePlaceCashOrder = async ({ user_id, cart}: IPlaceOrder) => {
             }
         })
 
-        transaction.set(order_ref, {
+        let firestore_order = {
             order_id: cart.order_id,
             user: {
                 user_id: user_id,
@@ -131,7 +134,28 @@ export const handlePlaceCashOrder = async ({ user_id, cart}: IPlaceOrder) => {
             },
             created_at: timestamp,
             order_status: 'required_confirmation'
-        } as IFirestoreOrder, { merge: true})            
+        } as IFirestoreOrder
+
+        transaction.set(order_ref, firestore_order, { merge: true})     
+        
+        const app_password = 'lzcufifwxzzrqoog'
+
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false, // true for 465, false for other ports
+            auth: {
+              user: 'taipeicuisine68@gmail.com', // generated ethereal user
+              pass: app_password, // generated ethereal password
+            },
+          });
+
+          await transporter.sendMail({
+            from: '"TAIPEI CUISINE 台北风味"<taipeicuisine68@gmail.com>', // sender address
+            to: "shawnwu1996@gmail.com", // list of receivers
+            subject: "Order Confirmation", // Subject line
+            html: generateOrderEmailHTML(firestore_order),
+          })
     })
 
     return {
