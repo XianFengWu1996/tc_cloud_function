@@ -145,7 +145,27 @@ export const sendContactMessage = async (req: Request, res: Response) => {
                 is_delivery: true,
                 payment_method: 'In Store',
                 customer_phone: '9175787352',
-            }), // html body
+            }),
+            attachments: [{
+                filename: 'bee.png',
+                path: `${process.cwd()}/utils/email/images/bee.png`,
+                cid: 'bee.png' //same cid value as in the html img src
+              },
+              {
+                filename: 'round_corner.png',
+                path: `${process.cwd()}/utils/email/images/round_corner.png`,
+                cid: 'round_corner.png' //same cid value as in the html img src
+              },
+              {
+                filename: 'whitelogo.png',
+                path: `${process.cwd()}/utils/email/images/whitelogo.png`,
+                cid: 'whitelogo.png' //same cid value as in the html img src
+              },
+              {
+                filename: 'Mama_Bakery.png',
+                path: `${process.cwd()}/utils/email/images/Mama_Bakery.png`,
+                cid: 'Mama_Bakery.png' //same cid value as in the html img src
+              }],
           })
         
 

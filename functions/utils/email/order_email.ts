@@ -178,7 +178,7 @@ export const generateOrderEmailHTML = (_: ITempData) => {
     </tbody>
     </table>
     <div align="center" class="img-container center autowidth" style="padding-right: 0px;padding-left: 0px;">
-    <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr style="line-height:0px"><td style="padding-right: 0px;padding-left: 0px;" align="center"><![endif]--><a href="https://taipeicuisines.com/" style="outline:none" tabindex="-1" target="_blank"></a><img align="center" border="0" class="center autowidth" src="cid:whitelogo.png" style="text-decoration: none; -ms-interpolation-mode: bicubic; height: auto; border: 0; width: 100%; max-width: 200px; display: block;" width="200"/></a>
+    <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr style="line-height:0px"><td style="padding-right: 0px;padding-left: 0px;" align="center"><![endif]--><a href="https://taipeicuisines.com/" style="outline:none" tabindex="-1" target="_blank"></a><img align="center" border="0" class="center autowidth" src="https://firebasestorage.googleapis.com/v0/b/foodorder-43af7.appspot.com/o/whitelogo.png?alt=media&token=f093c30c-cf51-48ed-ab8d-1d3d3ac077e7" style="text-decoration: none; -ms-interpolation-mode: bicubic; height: auto; border: 0; width: 100%; max-width: 200px; display: block;" width="200"/></a>
     <!--[if mso]></td></tr></table><![endif]-->
     </div>
     <table border="0" cellpadding="0" cellspacing="0" class="divider" role="presentation" style="table-layout: fixed; vertical-align: top; border-spacing: 0; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;" valign="top" width="100%">
@@ -197,7 +197,7 @@ export const generateOrderEmailHTML = (_: ITempData) => {
     </tbody>
     </table>
     <div align="center" class="img-container center autowidth" style="padding-right: 0px;padding-left: 0px;">
-    <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr style="line-height:0px"><td style="padding-right: 0px;padding-left: 0px;" align="center"><![endif]--><a href="https://taipeicuisines.com/" style="outline:none" tabindex="-1" target="_blank"><img align="center" border="0" class="center autowidth" src="cid:Mama_Bakery.png" style="text-decoration: none; -ms-interpolation-mode: bicubic; height: auto; border: 0; width: 100%; max-width: 399px; display: block;" width="399"/></a>
+    <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr style="line-height:0px"><td style="padding-right: 0px;padding-left: 0px;" align="center"><![endif]--><a href="https://taipeicuisines.com/" style="outline:none" tabindex="-1" target="_blank"><img align="center" border="0" class="center autowidth" src="https://firebasestorage.googleapis.com/v0/b/foodorder-43af7.appspot.com/o/bakery.png?alt=media&token=d711161e-8b60-4a21-a962-b8b6a08b3a5a" style="text-decoration: none; -ms-interpolation-mode: bicubic; height: auto; border: 0; width: 100%; max-width: 399px; display: block;" width="399"/></a>
     <!--[if mso]></td></tr></table><![endif]-->
     </div>
     <table border="0" cellpadding="0" cellspacing="0" class="divider" role="presentation" style="table-layout: fixed; vertical-align: top; border-spacing: 0; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;" valign="top" width="100%">
@@ -266,7 +266,7 @@ export const generateOrderEmailHTML = (_: ITempData) => {
     <div style="border-top:0px solid transparent; border-left:0px solid transparent; border-bottom:0px solid transparent; border-right:0px solid transparent; padding-top:5px; padding-bottom:0px; padding-right: 0px; padding-left: 0px;">
     <!--<![endif]-->
     <div align="center" class="img-container center autowidth" style="padding-right: 0px;padding-left: 0px;">
-    <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr style="line-height:0px"><td style="padding-right: 0px;padding-left: 0px;" align="center"><![endif]--><img align="center" border="0" class="center autowidth mobile_hide" src="cid:round_corner.png" style="text-decoration: none; -ms-interpolation-mode: bicubic; height: auto; border: 0; width: 100%; max-width: 680px; display: block;" width="680"/>
+    <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr style="line-height:0px"><td style="padding-right: 0px;padding-left: 0px;" align="center"><![endif]--><img align="center" border="0" class="center autowidth mobile_hide" src="https://firebasestorage.googleapis.com/v0/b/foodorder-43af7.appspot.com/o/round_corner.png?alt=media&token=c7779eb8-5f19-43ce-9baf-a2543029dab7" style="text-decoration: none; -ms-interpolation-mode: bicubic; height: auto; border: 0; width: 100%; max-width: 680px; display: block;" width="680"/>
     <!--[if mso]></td></tr></table><![endif]-->
     </div>
     <!--[if (!mso)&(!IE)]><!-->
@@ -1212,7 +1212,7 @@ export const generateOrderEmailHTML = (_: ITempData) => {
     <table cellpadding="0" cellspacing="0" class="icons-inner" role="presentation" style="table-layout: fixed; vertical-align: top; border-spacing: 0; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;" valign="top">
     <!--<![endif]-->
     <tr style="vertical-align: top;" valign="top">
-    <td align="center" style="word-break: break-word; vertical-align: top; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;" valign="top"><a href="https://www.designedwithbee.com/"><img align="center" alt="Designed with BEE" class="icon" height="32" src="cid:bee.png" style="border:0;" width="null"/></a></td>
+    <td align="center" style="word-break: break-word; vertical-align: top; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;" valign="top"><a href="https://www.designedwithbee.com/"><img align="center" alt="Designed with BEE" class="icon" height="32" src="https://firebasestorage.googleapis.com/v0/b/foodorder-43af7.appspot.com/o/bee.png?alt=media&token=ec14a1c0-42aa-41f9-9a7b-d41216e1c33d" style="border:0;" width="null"/></a></td>
     <td style="word-break: break-word; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; font-size: 15px; color: #9d9d9d; vertical-align: middle; letter-spacing: undefined;" valign="middle"><a href="https://www.designedwithbee.com/" style="color:#9d9d9d;text-decoration:none;">Designed with BEE</a></td>
     </tr>
     </table>
