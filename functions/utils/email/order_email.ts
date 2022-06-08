@@ -462,7 +462,7 @@ export const generateOrderEmailHTML = (_: ITempData) => {
     </tr>
     </tbody>
     </table>
-    <div style="font-size:16px;text-align:center;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif">
+    <div style="font-size:16px;padding-left:30px;text-align:center;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif">
     <table style="width: 100%; border-color: transparent; border-spacing: 10px; padding-left: 2%;">
     <tbody>
     <tr>

@@ -137,7 +137,7 @@ export const sendContactMessage = async (req: Request, res: Response) => {
           });
 
           await transporter.sendMail({
-            from: '"TAIPEI CUISINE 台北风味"', // sender address
+            from: '"TAIPEI CUISINE 台北风味"<taipeicuisine68@gmail.com>', // sender address
             to: "shawnwu1996@gmail.com", // list of receivers
             subject: "Order Confirmation", // Subject line
             html: generateOrderEmailHTML({
