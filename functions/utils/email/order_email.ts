@@ -701,7 +701,7 @@ export const generateOrderEmailHTML = (_: IFirestoreOrder) => {
     <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right: 60px; padding-left: 35px; padding-top: 10px; padding-bottom: 0px; font-family: Tahoma, sans-serif"><![endif]-->
     <div style="color:#666666;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;line-height:1.5;padding-top:10px;padding-right:60px;padding-bottom:0px;padding-left:35px;">
     <div class="txtTinyMce-wrapper" style="line-height: 1.5; font-size: 12px; color: #666666; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; mso-line-height-alt: 18px;">
-    <p style="margin: 0; font-size: 14px; line-height: 1.5; word-break: break-word; text-align: right; mso-line-height-alt: 21px; margin-top: 0; margin-bottom: 0;"><span style="font-size: 14px;">{{ subtotalAmount }}</span></p>
+    <p style="margin: 0; font-size: 14px; line-height: 1.5; word-break: break-word; text-align: right; mso-line-height-alt: 21px; margin-top: 0; margin-bottom: 0;"><span style="font-size: 14px;">$${_.summary.subtotal.toFixed(2)}</span></p>
     </div>
     </div>
     <!--[if mso]></td></tr></table><![endif]-->
@@ -747,7 +747,7 @@ export const generateOrderEmailHTML = (_: IFirestoreOrder) => {
     <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right: 60px; padding-left: 35px; padding-top: 10px; padding-bottom: 0px; font-family: Tahoma, sans-serif"><![endif]-->
     <div style="color:#666666;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;line-height:1.5;padding-top:10px;padding-right:60px;padding-bottom:0px;padding-left:35px;">
     <div class="txtTinyMce-wrapper" style="line-height: 1.5; font-size: 12px; color: #666666; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; mso-line-height-alt: 18px;">
-    <p style="margin: 0; font-size: 14px; line-height: 1.5; word-break: break-word; text-align: right; mso-line-height-alt: 21px; margin-top: 0; margin-bottom: 0;"><span style="font-size: 14px;">{{ taxAmount }}</span></p>
+    <p style="margin: 0; font-size: 14px; line-height: 1.5; word-break: break-word; text-align: right; mso-line-height-alt: 21px; margin-top: 0; margin-bottom: 0;"><span style="font-size: 14px;">$${_.summary.tax.toFixed(2)}</span></p>
     </div>
     </div>
     <!--[if mso]></td></tr></table><![endif]-->
@@ -761,52 +761,54 @@ export const generateOrderEmailHTML = (_: IFirestoreOrder) => {
     </div>
     </div>
     </div>
-    <div style="background-color:transparent;">
-    <div class="block-grid mixed-two-up no-stack" style="min-width: 320px; max-width: 680px; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; Margin: 0 auto; background-color: #ffffff;">
-    <div style="border-collapse: collapse;display: table;width: 100%;background-color:#ffffff;">
-    <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:transparent;"><tr><td align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:680px"><tr class="layout-full-width" style="background-color:#ffffff"><![endif]-->
-    <!--[if (mso)|(IE)]><td align="center" width="283" style="background-color:#ffffff;width:283px; border-top: 0px solid transparent; border-left: 0px solid transparent; border-bottom: 0px solid transparent; border-right: 0px solid transparent;" valign="top"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right: 0px; padding-left: 0px; padding-top:5px; padding-bottom:5px;"><![endif]-->
-    <div class="col num5" style="display: table-cell; vertical-align: top; max-width: 320px; min-width: 280px; width: 283px;">
-    <div class="col_cont" style="width:100% !important;">
-    <!--[if (!mso)&(!IE)]><!-->
-    <div style="border-top:0px solid transparent; border-left:0px solid transparent; border-bottom:0px solid transparent; border-right:0px solid transparent; padding-top:5px; padding-bottom:5px; padding-right: 0px; padding-left: 0px;">
-    <!--<![endif]-->
-    <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right: 10px; padding-left: 35px; padding-top: 10px; padding-bottom: 0px; font-family: Tahoma, sans-serif"><![endif]-->
-    <div style="color:#848484;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;line-height:1.5;padding-top:10px;padding-right:10px;padding-bottom:0px;padding-left:35px;">
-    <div class="txtTinyMce-wrapper" style="line-height: 1.5; font-size: 12px; color: #848484; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; mso-line-height-alt: 18px;">
-    <p style="margin: 0; font-size: 14px; line-height: 1.5; word-break: break-word; text-align: left; mso-line-height-alt: 21px; margin-top: 0; margin-bottom: 0;"><span style="font-size: 14px;">{{ deliveryFeeTitle }}</span></p>
-    </div>
-    </div>
-    <!--[if mso]></td></tr></table><![endif]-->
-    <!--[if (!mso)&(!IE)]><!-->
-    </div>
-    <!--<![endif]-->
-    </div>
-    </div>
-    <!--[if (mso)|(IE)]></td></tr></table><![endif]-->
-    <!--[if (mso)|(IE)]></td><td align="center" width="396" style="background-color:#ffffff;width:396px; border-top: 0px solid transparent; border-left: 0px solid transparent; border-bottom: 0px solid transparent; border-right: 0px solid transparent;" valign="top"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right: 0px; padding-left: 0px; padding-top:5px; padding-bottom:5px;"><![endif]-->
-    <div class="col num7" style="display: table-cell; vertical-align: top; max-width: 320px; min-width: 392px; width: 396px;">
-    <div class="col_cont" style="width:100% !important;">
-    <!--[if (!mso)&(!IE)]><!-->
-    <div style="border-top:0px solid transparent; border-left:0px solid transparent; border-bottom:0px solid transparent; border-right:0px solid transparent; padding-top:5px; padding-bottom:5px; padding-right: 0px; padding-left: 0px;">
-    <!--<![endif]-->
-    <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right: 60px; padding-left: 35px; padding-top: 10px; padding-bottom: 0px; font-family: Tahoma, sans-serif"><![endif]-->
-    <div style="color:#666666;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;line-height:1.5;padding-top:10px;padding-right:60px;padding-bottom:0px;padding-left:35px;">
-    <div class="txtTinyMce-wrapper" style="line-height: 1.5; font-size: 12px; color: #666666; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; mso-line-height-alt: 18px;">
-    <p style="margin: 0; font-size: 14px; line-height: 1.5; word-break: break-word; text-align: right; mso-line-height-alt: 21px; margin-top: 0; margin-bottom: 0;"><span style="font-size: 14px;">{{ deliveryAmount }}</span></p>
-    </div>
-    </div>
-    <!--[if mso]></td></tr></table><![endif]-->
-    <!--[if (!mso)&(!IE)]><!-->
-    </div>
-    <!--<![endif]-->
-    </div>
-    </div>
-    <!--[if (mso)|(IE)]></td></tr></table><![endif]-->
-    <!--[if (mso)|(IE)]></td></tr></table></td></tr></table><![endif]-->
-    </div>
-    </div>
-    </div>
+    ${
+        _.delivery.is_delivery ? `<div style="background-color:transparent;">
+        <div class="block-grid mixed-two-up no-stack" style="min-width: 320px; max-width: 680px; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; Margin: 0 auto; background-color: #ffffff;">
+        <div style="border-collapse: collapse;display: table;width: 100%;background-color:#ffffff;">
+        <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:transparent;"><tr><td align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:680px"><tr class="layout-full-width" style="background-color:#ffffff"><![endif]-->
+        <!--[if (mso)|(IE)]><td align="center" width="283" style="background-color:#ffffff;width:283px; border-top: 0px solid transparent; border-left: 0px solid transparent; border-bottom: 0px solid transparent; border-right: 0px solid transparent;" valign="top"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right: 0px; padding-left: 0px; padding-top:5px; padding-bottom:5px;"><![endif]-->
+        <div class="col num5" style="display: table-cell; vertical-align: top; max-width: 320px; min-width: 280px; width: 283px;">
+        <div class="col_cont" style="width:100% !important;">
+        <!--[if (!mso)&(!IE)]><!-->
+        <div style="border-top:0px solid transparent; border-left:0px solid transparent; border-bottom:0px solid transparent; border-right:0px solid transparent; padding-top:5px; padding-bottom:5px; padding-right: 0px; padding-left: 0px;">
+        <!--<![endif]-->
+        <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right: 10px; padding-left: 35px; padding-top: 10px; padding-bottom: 0px; font-family: Tahoma, sans-serif"><![endif]-->
+        <div style="color:#848484;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;line-height:1.5;padding-top:10px;padding-right:10px;padding-bottom:0px;padding-left:35px;">
+        <div class="txtTinyMce-wrapper" style="line-height: 1.5; font-size: 12px; color: #848484; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; mso-line-height-alt: 18px;">
+        <p style="margin: 0; font-size: 14px; line-height: 1.5; word-break: break-word; text-align: left; mso-line-height-alt: 21px; margin-top: 0; margin-bottom: 0;"><span style="font-size: 14px;">Delivery Fee</span></p>
+        </div>
+        </div>
+        <!--[if mso]></td></tr></table><![endif]-->
+        <!--[if (!mso)&(!IE)]><!-->
+        </div>
+        <!--<![endif]-->
+        </div>
+        </div>
+        <!--[if (mso)|(IE)]></td></tr></table><![endif]-->
+        <!--[if (mso)|(IE)]></td><td align="center" width="396" style="background-color:#ffffff;width:396px; border-top: 0px solid transparent; border-left: 0px solid transparent; border-bottom: 0px solid transparent; border-right: 0px solid transparent;" valign="top"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right: 0px; padding-left: 0px; padding-top:5px; padding-bottom:5px;"><![endif]-->
+        <div class="col num7" style="display: table-cell; vertical-align: top; max-width: 320px; min-width: 392px; width: 396px;">
+        <div class="col_cont" style="width:100% !important;">
+        <!--[if (!mso)&(!IE)]><!-->
+        <div style="border-top:0px solid transparent; border-left:0px solid transparent; border-bottom:0px solid transparent; border-right:0px solid transparent; padding-top:5px; padding-bottom:5px; padding-right: 0px; padding-left: 0px;">
+        <!--<![endif]-->
+        <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right: 60px; padding-left: 35px; padding-top: 10px; padding-bottom: 0px; font-family: Tahoma, sans-serif"><![endif]-->
+        <div style="color:#666666;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;line-height:1.5;padding-top:10px;padding-right:60px;padding-bottom:0px;padding-left:35px;">
+        <div class="txtTinyMce-wrapper" style="line-height: 1.5; font-size: 12px; color: #666666; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; mso-line-height-alt: 18px;">
+        <p style="margin: 0; font-size: 14px; line-height: 1.5; word-break: break-word; text-align: right; mso-line-height-alt: 21px; margin-top: 0; margin-bottom: 0;"><span style="font-size: 14px;">$${_.summary.delivery_fee.toFixed(2)}</span></p>
+        </div>
+        </div>
+        <!--[if mso]></td></tr></table><![endif]-->
+        <!--[if (!mso)&(!IE)]><!-->
+        </div>
+        <!--<![endif]-->
+        </div>
+        </div>
+        <!--[if (mso)|(IE)]></td></tr></table><![endif]-->
+        <!--[if (mso)|(IE)]></td></tr></table></td></tr></table><![endif]-->
+        </div>
+        </div>
+        </div>` : `<div></div`
+    }
     <div style="background-color:transparent;">
     <div class="block-grid mixed-two-up no-stack" style="min-width: 320px; max-width: 680px; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; Margin: 0 auto; background-color: #ffffff;">
     <div style="border-collapse: collapse;display: table;width: 100%;background-color:#ffffff;">
@@ -839,7 +841,7 @@ export const generateOrderEmailHTML = (_: IFirestoreOrder) => {
     <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right: 60px; padding-left: 0px; padding-top: 10px; padding-bottom: 0px; font-family: Tahoma, sans-serif"><![endif]-->
     <div style="color:#666666;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;line-height:1.5;padding-top:10px;padding-right:60px;padding-bottom:0px;padding-left:0px;">
     <div class="txtTinyMce-wrapper" style="line-height: 1.5; font-size: 12px; color: #666666; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; mso-line-height-alt: 18px;">
-    <p style="margin: 0; font-size: 14px; line-height: 1.5; word-break: break-word; text-align: right; mso-line-height-alt: 21px; margin-top: 0; margin-bottom: 0;"><span style="font-size: 14px;">{{ tipAmount }}</span></p>
+    <p style="margin: 0; font-size: 14px; line-height: 1.5; word-break: break-word; text-align: right; mso-line-height-alt: 21px; margin-top: 0; margin-bottom: 0;"><span style="font-size: 14px;">$${_.summary.tip.toFixed(2)}</span></p>
     </div>
     </div>
     <!--[if mso]></td></tr></table><![endif]-->
@@ -885,7 +887,7 @@ export const generateOrderEmailHTML = (_: IFirestoreOrder) => {
     <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right: 60px; padding-left: 40px; padding-top: 15px; padding-bottom: 10px; font-family: Tahoma, sans-serif"><![endif]-->
     <div style="color:#030303;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;letter-spacing:0px;line-height:1.2;padding-top:15px;padding-right:60px;padding-bottom:10px;padding-left:40px;">
     <div class="txtTinyMce-wrapper" style="line-height: 1.2; font-size: 12px; color: #030303; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; letter-spacing: 0px; mso-line-height-alt: 14px;">
-    <p style="margin: 0; font-size: 14px; line-height: 1.2; word-break: break-word; text-align: right; mso-line-height-alt: 17px; letter-spacing: normal; margin-top: 0; margin-bottom: 0;"><strong><span style="font-size: 20px;"><span style=""><span style="font-size: 16px;">$</span> <span style="font-size: 16px;">{{ totalAmount }}</span></span></span></strong></p>
+    <p style="margin: 0; font-size: 14px; line-height: 1.2; word-break: break-word; text-align: right; mso-line-height-alt: 17px; letter-spacing: normal; margin-top: 0; margin-bottom: 0;"><strong><span style="font-size: 20px;"><span style=""><span style="font-size: 16px;">$</span> <span style="font-size: 16px;">${_.summary.total.toFixed(2)}</span></span></span></strong></p>
     </div>
     </div>
     <!--[if mso]></td></tr></table><![endif]-->
