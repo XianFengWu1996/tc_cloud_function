@@ -1,13 +1,10 @@
 import { Request, Response } from "express";
 import axios from 'axios';
-import { logger } from '../utils/logger'
 import { v4 } from 'uuid' 
 import { firestore } from 'firebase-admin'
 import { addMinutesTounix_timestamp, hasExpire } from "../utils/time";
 import { isEmpty, isEqual } from "lodash";
 import { checkForValidPhoneNumber } from "../utils/validateData";
-import { generateOrderEmailHTML } from '../utils/email/order_email'
-import nodemailer from 'nodemailer'
 
 interface ICodeData {
     expiration: number,
@@ -59,12 +56,10 @@ export const sendMessage = async (req: Request, res: Response) => {
         if(axios.isAxiosError(error)){
             // if axios request has failed 
             // only one request here, send a general message to notify th user
-            logger.error(error.response?.data);
             return res.status(400).send({ error: 'ERR: Failed to send the message'})
         }
         // let err = (error as AxiosError)
         // console.log(err.response?.data);
-        logger.error((error as Error).message);
         res.status(400).send({ error: 'ERR: Unable to complete the request'});
     }
 }

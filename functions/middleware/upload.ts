@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { https } from 'firebase-functions/v1';
+import { https } from 'firebase-functions';
 import Busboy from 'busboy';
 
 import os from 'os'

@@ -4,8 +4,6 @@ import { isEmpty, isString } from "lodash";
 import Stripe from "stripe";
 import { stripe } from "../controller/payment";
 import { format_date } from "./time";
-import nodemailer from 'nodemailer'
-import { generateOrderEmailHTML } from "./email/order_email";
 
 
 interface IPlaceOrder {

@@ -2,8 +2,7 @@ import { Request, Response } from "express";
 import { checkForValidAddress } from '../utils/validateData'
 import { firestore } from 'firebase-admin'
 import axios from "axios";
-import admin from "../routes/admin";
-import { isEmpty, merge } from "lodash";
+import { isEmpty } from "lodash";
 
 export const getCustomerInfo = async (req: Request, res: Response) => {
     try {
@@ -111,8 +110,8 @@ export const updateAptAndBusiness = async (req: Request, res:Response) => {
 
         await firestore().collection('/usersTest').doc(req.user.uid).set({
             address: {
-                apt: isEmpty(req.body.apt) ? address.apt : req.body.apt,
-                business: isEmpty(req.body.business) ? address.business : req.body.business
+                apt: isEmpty(req.body.apt) ? (address.apt ?? '') : req.body.apt,
+                business: isEmpty(req.body.business) ? (address.business ?? '') : req.body.business
             }
         } as ICustomer, {merge: true})
 
