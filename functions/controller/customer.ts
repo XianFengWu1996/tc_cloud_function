@@ -122,6 +122,21 @@ export const updateAptAndBusiness = async (req: Request, res:Response) => {
     }
 }
 
+export const removeAptAndBusiness = async (req: Request, res:Response) => {
+    try {
+        await firestore().collection('/usersTest').doc(req.user.uid).set({
+            address: {
+                apt: '',
+                business: ''
+            }
+        } as ICustomer, {merge: true})
+
+        res.status(200).send();
+    } catch (error) {
+        res.status(400).send({ error: (error as Error).message ?? 'Err: Failed to remove apt and business'})
+    }
+}
+
 export const getOrderHistory =  async (req: Request, res: Response) => {
     try {
         let orders = (await firestore().collection('/orderTest')

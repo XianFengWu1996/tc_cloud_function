@@ -32,5 +32,7 @@ auth.post('/address/delivery', checkFirebaseToken, customerController.calculateD
 
 auth.patch('/address/apt_business', checkFirebaseToken, customerController.updateAptAndBusiness)
 
+auth.delete('/address/apt_business', checkFirebaseToken, customerController.removeAptAndBusiness)
+
 
 export default auth
