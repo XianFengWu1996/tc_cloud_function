@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { checkForValidAddress } from '../utils/validateData'
 import { firestore } from 'firebase-admin'
 import axios from "axios";
+import admin from "../routes/admin";
+import { isEmpty, merge } from "lodash";
 
 export const getCustomerInfo = async (req: Request, res: Response) => {
     try {
@@ -22,7 +24,6 @@ export const getCustomerInfo = async (req: Request, res: Response) => {
         res.status(400).send({ error: 'ERR: Failed to retrieve user data'});
     }
 }
-
 
 export const updateCustomerName = async (req: Request, res: Response) => {
     try {
@@ -97,6 +98,27 @@ export const calculateDelivery = async (req: Request, res: Response) => {
         }
 
         res.status(400).send({ error: (error as Error).message ?? 'ERR: Failed to set address'})
+    }
+}
+
+export const updateAptAndBusiness = async (req: Request, res:Response) => {
+    try {
+        if(isEmpty(req.body.apt) && isEmpty(req.body.business)) {
+            throw new Error('ERR: Please provide either apt or business to proceed');
+        }
+
+        const address:IAddress = req.body.address;
+
+        await firestore().collection('/usersTest').doc(req.user.uid).set({
+            address: {
+                apt: isEmpty(req.body.apt) ? address.apt : req.body.apt,
+                business: isEmpty(req.body.business) ? address.business : req.body.business
+            }
+        } as ICustomer, {merge: true})
+
+        res.status(200).send();
+    } catch (error) {
+        res.status(400).send({ error: (error as Error).message ?? 'Err: Failed to update apt or business'})
     }
 }
 

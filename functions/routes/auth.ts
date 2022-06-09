@@ -30,4 +30,7 @@ auth.get('/customer/reward_history', checkFirebaseToken, customerController.getR
 // ADDRESS
 auth.post('/address/delivery', checkFirebaseToken, customerController.calculateDelivery)
 
+auth.patch('/address/apt_business', checkFirebaseToken, customerController.updateAptAndBusiness)
+
+
 export default auth
