@@ -3,6 +3,7 @@ import { body } from 'express-validator';
 import * as storeController from '../controller/store';
 import {  checkTokenInCookie } from '../middleware/auth';
 import { filesUpload } from '../middleware/upload'
+import { convert_minute_to_timestamp, format_date } from '../utils/time';
 
 const store = express.Router();
 
@@ -24,6 +25,15 @@ store.get('/menus', storeController.getMenuData);
 store.patch('/menus/:dishId',checkTokenInCookie, storeController.updateMenu);
 
 store.post('/menus/image/upload', checkTokenInCookie, filesUpload, storeController.uploadImage)
+
+store.get('/testing', (req, res) => {
+    let date = format_date()
+
+    res.send({
+        date,
+        fif: convert_minute_to_timestamp(1),
+    })
+})
 
 export default store;
 

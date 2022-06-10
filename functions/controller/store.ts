@@ -5,7 +5,7 @@ import { checkForAdminStatus } from "./admin";
 import { createPersistentDownloadUrl } from '../utils/url'
 import { checkForValidDishData } from '../utils/validateData'
 import { v4 } from 'uuid'
-import { addMinutesTounix_timestamp } from "../utils/time";
+import { convert_minute_to_timestamp } from "../utils/time";
 
 
 export const getPublicInfo = async (req: Request, res: Response, next:NextFunction) => {
@@ -18,7 +18,7 @@ export const getPublicInfo = async (req: Request, res: Response, next:NextFuncti
             special_hour: data.special_hour,
             message: data.message,
             server_is_on: data.server_is_on,
-            expiration: addMinutesTounix_timestamp(30)
+            expiration: convert_minute_to_timestamp(30)
         }); 
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to get store info' });
@@ -61,6 +61,7 @@ export const updateServerStatus = async (req: Request, res:Response) => {
 
 export const getMenuData = async(req: Request, res:Response) => {
    try {
+    console.log('this is ran')
     let fulldayResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('fullday').get();
     let lunchResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('lunch').get();
     let fullday: IMenu = {
@@ -138,7 +139,8 @@ export const getMenuData = async(req: Request, res:Response) => {
         fullday, 
         lunch, 
         special, 
-        expiration: addMinutesTounix_timestamp(15)
+        // expiration: convert_minute_to_timestamp(15)
+        expiration: convert_minute_to_timestamp(15)
     });
    } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to get menu' })

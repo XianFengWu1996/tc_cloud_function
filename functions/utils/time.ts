@@ -10,12 +10,12 @@ export const format_date = () => {
     }
 }
 
-export const addMinutesTounix_timestamp = (minute: number) => {
+export const convert_minute_to_timestamp = (minute: number) => {
     const { date } = format_date();
-    return date.plus({ minute }).toUnixInteger()
+    return date.plus({ minute }).toMillis()
 }
 
 export const hasExpire = (time: number) => {
     const { date } = format_date();
-    return date.toUnixInteger() >= time;
+    return date.toMillis() >= time;
 }
