@@ -3,7 +3,6 @@ import { body } from 'express-validator';
 import * as storeController from '../controller/store';
 import {  checkTokenInCookie } from '../middleware/auth';
 import { filesUpload } from '../middleware/upload'
-import { convert_minute_to_timestamp, format_date } from '../utils/time';
 
 const store = express.Router();
 
@@ -26,21 +25,8 @@ store.patch('/menus/:dishId',checkTokenInCookie, storeController.updateMenu);
 
 store.post('/menus/image/upload', checkTokenInCookie, filesUpload, storeController.uploadImage)
 
-store.get('/testing', (req, res) => {
-    let date = format_date()
-
-    res.send({
-        date,
-        fif: convert_minute_to_timestamp(1),
-    })
-})
 
 export default store;
-
-
-
-
-
 
 // store.get('/add_field_to_dish', async(req, res) => {
 //     try {
@@ -55,7 +41,10 @@ export default store;
 
 //         lunch.map(async (_) => {
 //             _.dishes.map((dish) => {
-//                 dish.is_customizable = true
+//                 dish.additional_info = {
+//                     menu: 'lunch',
+//                     category: _.document_name
+//                 }
 //             })
 
 //             await firestore().collection(`/menus/${process.env.STORE_ID}/lunch`).doc(_.document_name).update({
@@ -74,7 +63,10 @@ export default store;
 
 //         fullday.map(async (_) => {
 //             _.dishes.map((dish) => {
-//                 dish.is_customizable = true
+//                 dish.additional_info = {
+//                     menu: 'fullday',
+//                     category: _.document_name
+//                 }
 //             })
 
 //             await firestore().collection(`/menus/${process.env.STORE_ID}/fullday`).doc(_.document_name).update({

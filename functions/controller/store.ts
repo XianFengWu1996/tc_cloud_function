@@ -67,12 +67,14 @@ export const getMenuData = async(req: Request, res:Response) => {
     let fullday: IMenu = {
         id: process.env.FULLDAY_MENUID,
         en_name: 'Fullday',
+        document_name: 'fullday',
         ch_name: '全天',
         category: []
     } ;
     let lunch: IMenu = {
         id: process.env.LUNCH_MENUID,
         en_name: 'Lunch',
+        document_name: 'lunch',
         ch_name: '午餐',
         category: []
     };
@@ -80,6 +82,7 @@ export const getMenuData = async(req: Request, res:Response) => {
     let special: IMenu = {
         id: process.env.SPECIAL_MENUID,
         en_name: 'Most Popular',
+        document_name: 'special',
         ch_name: '推荐菜',
         category: []
     }
@@ -140,7 +143,7 @@ export const getMenuData = async(req: Request, res:Response) => {
         lunch, 
         special, 
         // expiration: convert_minute_to_timestamp(15)
-        expiration: convert_minute_to_timestamp(15)
+        expiration: convert_minute_to_timestamp(1)
     });
    } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to get menu' })
@@ -219,13 +222,23 @@ export const uploadImage = async(req: Request, res:Response) => {
 
 
 // for own use purpose only
+// interface IOldDish {
+//     food_name: string, 
+//     food_name_chinese: string,
+//     spicy: boolean,
+//     lunch: boolean,
+//     active: boolean, 
+//     price: number,
+//     food_id: string
+// }
+
 // export const transferMenuData = async (req: Request, res: Response) => {
 //     let response = await admin.firestore().collection('menu/lunch/details').get();
 //     let temp: ICategory[] = [];
 
 //     response.forEach((doc) => {
 //         let data = doc.data();
-//         let newDish:INewDish[] = [];
+//         let newDish:IDish[] = [];
 
 //         let oldDishes:IOldDish[] = data.dishes;
 
@@ -244,6 +257,11 @@ export const uploadImage = async(req: Request, res:Response) => {
 //                 label_id: dish.food_id,
 //                 order: index + 1,
 //                 pic_url: '',
+//                 is_customizable: false,
+//                 additional_info: {
+//                     menu: "",
+//                     category: ""
+//                 }
 //             })
 //         })
 

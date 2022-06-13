@@ -1,6 +1,7 @@
 interface IMenu {
     id: string, 
     category: ICategory[],
+    document_name: string,
     en_name: string, 
     ch_name: string,
 }
@@ -24,11 +25,15 @@ interface IDish {
     in_stock: boolean,
     is_customizable: boolean,
     price: number,
-    variant: [IVarirant],
+    variant: IVarirant[],
     description: string,
     label_id: string,
     order: number,
     pic_url:string,
+    additional_info: {
+        menu: string,
+        category: string,
+    }
 }
 
 interface IVarirant{
