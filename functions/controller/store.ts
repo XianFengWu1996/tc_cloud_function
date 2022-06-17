@@ -61,90 +61,126 @@ export const updateServerStatus = async (req: Request, res:Response) => {
 
 export const getMenuData = async(req: Request, res:Response) => {
    try {
-    console.log('this is ran')
-    let fulldayResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('fullday').get();
-    let lunchResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('lunch').get();
-    let fullday: IMenu = {
-        id: process.env.FULLDAY_MENUID,
-        en_name: 'Fullday',
-        document_name: 'fullday',
-        ch_name: '全天',
-        category: []
-    } ;
-    let lunch: IMenu = {
-        id: process.env.LUNCH_MENUID,
-        en_name: 'Lunch',
-        document_name: 'lunch',
-        ch_name: '午餐',
-        category: []
-    };
+    await admin.firestore().runTransaction(async (trans) => {
+        const menu_ref = admin.firestore().collection('/menus').doc(process.env.STORE_ID)
 
-    let special: IMenu = {
-        id: process.env.SPECIAL_MENUID,
-        en_name: 'Most Popular',
-        document_name: 'special',
-        ch_name: '推荐菜',
-        category: []
-    }
+        // get both the fullday and lunch menu from the database
+        const fulldayResult = await trans.get(menu_ref.collection('fullday'));
+        const lunchResult = await trans.get(menu_ref.collection('lunch'));
 
-    // create a category for this menu, will be the only category
-    special.category.push({
-        dishes: [],
-        id: process.env.SPECIAL_CATEGORYID, 
-        ch_name: '推荐菜',
-        en_name: 'Most Popular', 
-        document_name: '',
-        order: 0,
-    })
+        // generate menu objects for the client side
+        let fullday: IMenu = {
+            id: process.env.FULLDAY_MENUID,
+            en_name: 'Fullday',
+            document_name: 'fullday',
+            ch_name: '全天',
+            category: []
+        } ;
+        let lunch: IMenu = {
+            id: process.env.LUNCH_MENUID,
+            en_name: 'Lunch',
+            document_name: 'lunch',
+            ch_name: '午餐',
+            category: []
+        };
     
-    fulldayResult.docs.map((val) => {
-        let data = val.data();
+        let special: IMenu = {
+            id: process.env.SPECIAL_MENUID,
+            en_name: 'Most Popular',
+            document_name: 'special',
+            ch_name: '推荐菜',
+            category: []
+        }
 
-        let dishes: IDish[] = data.dishes;
-        dishes.map((dish) => {
-            if(dish.is_popular){
-                special.category[0].dishes.push(dish);
-            }
+        special.category.push({
+            dishes: [],
+            id: process.env.SPECIAL_CATEGORYID, 
+            ch_name: '推荐菜',
+            en_name: 'Most Popular', 
+            document_name: '',
+            order: 0,
         })
         
-        fullday.category.push({
-            id: data.id, 
-            ch_name: data.ch_name,
-            en_name: data.en_name, 
-            dishes: data.dishes,
-            document_name: data.document_name,
-            order: data.order,
-        })
-
-        fullday.category.sort((a, b) => {
-            return a.order - b.order;
+        fulldayResult.docs.map((val) => {
+            let data = val.data();
+    
+            let dishes: IDish[] = data.dishes;
+            dishes.map((dish) => {
+                if(dish.is_popular){
+                    special.category[0].dishes.push(dish);
+                }
+            })
+            
+            fullday.category.push({
+                id: data.id, 
+                ch_name: data.ch_name,
+                en_name: data.en_name, 
+                dishes: data.dishes,
+                document_name: data.document_name,
+                order: data.order,
+            })
+    
+            fullday.category.sort((a, b) => {
+                return a.order - b.order;
+            });
         });
-    });
-
-    lunchResult.docs.map((val) => {
-        let data = val.data();
-
-        lunch.category.push({
-            id: data.id, 
-            ch_name: data.ch_name,
-            en_name: data.en_name, 
-            dishes: data.dishes,
-            document_name: data.document_name,
-            order: data.order,
-        })
-
-        lunch.category.sort((a, b) => {
-            return a.order - b.order;
+    
+        lunchResult.docs.map((val) => {
+            let data = val.data();
+    
+            lunch.category.push({
+                id: data.id, 
+                ch_name: data.ch_name,
+                en_name: data.en_name, 
+                dishes: data.dishes,
+                document_name: data.document_name,
+                order: data.order,
+            })
+    
+            lunch.category.sort((a, b) => {
+                return a.order - b.order;
+            });
         });
-    });
+    
+        res.status(200).send({ 
+            fullday, 
+            lunch, 
+            special, 
+            expiration: convert_minute_to_timestamp(15),
+        });
 
-    res.status(200).send({ 
-        fullday, 
-        lunch, 
-        special, 
-        // expiration: convert_minute_to_timestamp(15)
-        expiration: convert_minute_to_timestamp(1)
-    });
+
+
+    })
+    // let fulldayResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('fullday').get();
+    // let lunchResult = await admin.firestore().collection('/menus').doc(process.env.STORE_ID).collection('lunch').get();
+
+   
+
+    // let fullday: IMenu = {
+    //     id: process.env.FULLDAY_MENUID,
+    //     en_name: 'Fullday',
+    //     document_name: 'fullday',
+    //     ch_name: '全天',
+    //     category: []
+    // } ;
+    // let lunch: IMenu = {
+    //     id: process.env.LUNCH_MENUID,
+    //     en_name: 'Lunch',
+    //     document_name: 'lunch',
+    //     ch_name: '午餐',
+    //     category: []
+    // };
+
+    // let special: IMenu = {
+    //     id: process.env.SPECIAL_MENUID,
+    //     en_name: 'Most Popular',
+    //     document_name: 'special',
+    //     ch_name: '推荐菜',
+    //     category: []
+    // }
+    // create a category for this menu, will be the only category
+  
    } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to get menu' })
    }
