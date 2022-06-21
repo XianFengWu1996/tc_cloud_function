@@ -8,12 +8,12 @@
     "strict": true,
     "target": "es2017",
     "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["./types/*"]
+    },
   },
   "compileOnSave": true,
-  "include": [
-    "src",
-    "types/*.d.ts"
-  ],
   "exclude": [
     "node_modules",
     "**/*.spec.ts"
