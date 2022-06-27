@@ -9,7 +9,24 @@ const store = express.Router();
 
 store.get('/menus', storeController.getMenuData);
 
+// store.get('/remove_unactive', async (req, res) => {
+//     try {
+//         let users = await auth().listUsers(1000)
 
+//         users.users.map(async user => {
+//             if(user.providerData[0].providerId === 'password'){
+//                 if(!user.emailVerified){
+//                     console.log(user.uid)
+//                     await auth().deleteUser(user.uid)
+//                 }
+//             }
+//         })
+
+//         res.send();
+//     } catch (error) {
+//         res.status(400).send();
+//     }
+// })
 
 
 // // ADMIN 

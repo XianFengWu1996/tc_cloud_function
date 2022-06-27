@@ -5,6 +5,7 @@ interface IFilterDishFromDoc {
     isFullday: boolean,
     special_dish: IDish[],
     category: ICategory[],
+    dishes: IDish[],
 }
 
 export const filterDishFromDoc = (_:IFilterDishFromDoc) => {
@@ -18,6 +19,8 @@ export const filterDishFromDoc = (_:IFilterDishFromDoc) => {
                 if(dish.is_popular){
                     _.special_dish.push(dish);
                 }
+
+                _.dishes.push(dish);
             })
         }
         
@@ -29,6 +32,7 @@ export const filterDishFromDoc = (_:IFilterDishFromDoc) => {
             document_name: data.document_name,
             order: data.order,
         })
+
 
         _.category.sort((a, b) => {
             return a.order - b.order;

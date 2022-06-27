@@ -18,6 +18,8 @@ export const getMenuData = async(req: Request, res:Response) => {
          // get both the fullday and lunch menu from the database
          const fulldayResult = await trans.get(menu_ref.collection('fullday'));
          const lunchResult = await trans.get(menu_ref.collection('lunch'));
+
+         let dishes: IDish[] = [];
  
          // generate menu objects for the client side
          let fullday: IMenu = {
@@ -57,6 +59,7 @@ export const getMenuData = async(req: Request, res:Response) => {
              isFullday: true,
              special_dish: special.category[0].dishes,
              category: fullday.category,
+             dishes
          })
          // filter for lunch menu
          filterDishFromDoc({
@@ -64,6 +67,7 @@ export const getMenuData = async(req: Request, res:Response) => {
              isFullday: false,
              special_dish: [],
              category: lunch.category,
+             dishes
          })
  
          //  ===========  STORE HOURS  ==============
@@ -75,6 +79,7 @@ export const getMenuData = async(req: Request, res:Response) => {
              lunch, 
              special,
              store,
+             dishes,
              expiration: convert_minute_to_timestamp(1),
          });
      })
