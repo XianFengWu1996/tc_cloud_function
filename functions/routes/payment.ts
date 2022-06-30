@@ -35,23 +35,39 @@ payment.get("/test", async(req, res) => {
             throw new Error('Server is currently down, please check back later')
         }
 
-        // second, check if within store operating hours
+        // third, check if there is a special hour on the day
+        let special_hour = data.hours.special_hour.find((hour) => {
+            return (hour.date.day === luxon_date.day) && (hour.date.month === luxon_date.month) && (hour.date.year === luxon_date.year)
+        })
+
+        if(special_hour){
+            // checks if the store is open with the special hour
+            if(!special_hour.open_for_business){
+                throw new Error(`The store will close entire day on ${special_hour.date.month}/${special_hour.date.day}/${special_hour.date.year}`)
+            }
+
+            // check if the store close early
+            if(currentMinute <= special_hour.open_hour || currentMinute >= special_hour.close_hour){
+                throw new Error(`The special operating hours for today are ${convert_minute_to_format_time(special_hour.open_hour)} - ${convert_minute_to_format_time(special_hour.close_hour)}`)
+            }
+        }
+
+        // third, check if within store operating hours
         let regular_hour = data.hours.regular_hour.find((hour) => hour.day_of_week.toLowerCase() === luxon_date.weekdayLong.toLowerCase() )
-        if(!regular_hour){
-            throw new Error('No operating hour is found')
+        if(regular_hour){
+            // check if the store is open on the day of the week
+            if(!regular_hour.open_for_business){
+                throw new Error(`The store is currently close on ${regular_hour.day_of_week}`)
+            }
+
+            // if the current minute is not within the range, throw error
+            if(currentMinute <= regular_hour.open_hour || currentMinute >= regular_hour.close_hour){
+                throw new Error(`The operating hours are ${convert_minute_to_format_time(regular_hour.open_hour)} - ${convert_minute_to_format_time(regular_hour.close_hour)}`)
+            }
+
         }
 
-        // check if the store is open on the day of the week
-        if(!regular_hour.open_for_business){
-            throw new Error(`The store is currently close on ${regular_hour.day_of_week}`)
-        }
-
-        // if the current minute is not within the range, throw error
-        if(currentMinute <= regular_hour.open_hour || currentMinute >= regular_hour.close_hour){
-            throw new Error(`The operating hours are ${convert_minute_to_format_time(regular_hour.open_hour)} - ${convert_minute_to_format_time(regular_hour.close_hour)}`)
-        }
-
-        // add an optional special hour here later
+     
     
         res.send()
     } catch (error) {
