@@ -28,7 +28,11 @@ interface IHours {
 }
 
 interface ISpecialHour extends IHours{
-    date: string | number,
+    date: {
+        day: number,
+        month: number,
+        year: number,
+    },
 }
 
 interface IMessage {

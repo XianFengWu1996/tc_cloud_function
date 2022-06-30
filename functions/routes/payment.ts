@@ -1,6 +1,8 @@
 import express from 'express'
 import { checkFirebaseToken } from '../middleware/auth';
 import * as paymentController from '../controller/payment'
+import { firestore } from 'firebase-admin';
+import { convert_minute_to_format_time, currentMinute, luxon_date } from '../utils/time';
 
 const payment = express.Router();
 
@@ -20,6 +22,43 @@ payment.delete('/payment_method', checkFirebaseToken, paymentController.deletePa
 payment.post("/place_online_order", checkFirebaseToken, paymentController.placeOnlineOrder);
 
 payment.post("/place_cash_order", checkFirebaseToken, paymentController.placeCashOrder)
+
+payment.get("/test", async(req, res) => {
+    try {
+        let store = await firestore().collection('store').doc(process.env.STORE_ID).get() 
+        console.log(store.data())
+    
+        let data = store.data() as IStore;
+        
+        // first, check if the server is on 
+        if(!data.server_is_on){
+            throw new Error('Server is currently down, please check back later')
+        }
+
+        // second, check if within store operating hours
+        let regular_hour = data.hours.regular_hour.find((hour) => hour.day_of_week.toLowerCase() === luxon_date.weekdayLong.toLowerCase() )
+        if(!regular_hour){
+            throw new Error('No operating hour is found')
+        }
+
+        // check if the store is open on the day of the week
+        if(!regular_hour.open_for_business){
+            throw new Error(`The store is currently close on ${regular_hour.day_of_week}`)
+        }
+
+        // if the current minute is not within the range, throw error
+        if(currentMinute <= regular_hour.open_hour || currentMinute >= regular_hour.close_hour){
+            throw new Error(`The operating hours are ${convert_minute_to_format_time(regular_hour.open_hour)} - ${convert_minute_to_format_time(regular_hour.close_hour)}`)
+        }
+
+        // add an optional special hour here later
+    
+        res.send()
+    } catch (error) {
+        console.log(error)
+        res.status(400).send({ error: (error as Error).message ?? 'Fail to do something'})
+    }
+})
 
 
 export default payment;
