@@ -3,7 +3,9 @@ import { firestore } from "firebase-admin"
 import { isEmpty, isString } from "lodash";
 import Stripe from "stripe";
 import { stripe } from "../controller/payment";
-import { format_date } from "./time";
+import { generateOrderEmailHTML } from "./email/order_email";
+import nodemailer from 'nodemailer'
+import { convert_minute_to_format_time, currentMinute, format_date, luxon_date } from "./time";
 
 
 interface IPlaceOrder {
@@ -60,11 +62,15 @@ const handleRewardPointCalculation = (_: IHandleRewardPointCalculation) => {
 export const handlePlaceCashOrder = async ({ user_id, cart}: IPlaceOrder) => {
     let customer = {} as ICustomer;
     const { timestamp, date } = format_date();
-    const order_ref = firestore().collection('orderTest').doc(cart.order_id);
-    const user_ref = firestore().collection('usersTest').doc(user_id)
+ 
 
     await firestore().runTransaction(async transaction => {
-        
+        const order_ref = firestore().collection('orderTest').doc(cart.order_id);
+        const user_ref = firestore().collection('usersTest').doc(user_id)
+        const store_ref = firestore().collection('store').doc(process.env.STORE_ID);
+
+        const store = (await store_ref.get()).data() as IStore;
+        checkStoreOperatingStatus(store);
 
         customer = (await transaction.get(user_ref)).data() as ICustomer
         if(!customer){
@@ -82,7 +88,7 @@ export const handlePlaceCashOrder = async ({ user_id, cart}: IPlaceOrder) => {
             }
         })
 
-        transaction.set(order_ref, {
+        let firestore_order = {
             order_id: cart.order_id,
             user: {
                 user_id: user_id,
@@ -133,26 +139,28 @@ export const handlePlaceCashOrder = async ({ user_id, cart}: IPlaceOrder) => {
             },
             created_at: timestamp,
             order_status: 'required_confirmation'
-        } as IFirestoreOrder, { merge: true})     
+        } as IFirestoreOrder
+
+        transaction.set(order_ref, firestore_order, { merge: true})     
         
-        // const app_password = 'lzcufifwxzzrqoog'
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false, // true for 465, false for other ports
+            auth: {
+              user: process.env.NODEMAILER_USER,
+              pass: process.env.NODEMAILER_PASS, 
+            },
+          });
 
-        // let transporter = nodemailer.createTransport({
-        //     host: "smtp.gmail.com",
-        //     port: 587,
-        //     secure: false, // true for 465, false for other ports
-        //     auth: {
-        //       user: 'taipeicuisine68@gmail.com', // generated ethereal user
-        //       pass: app_password, // generated ethereal password
-        //     },
-        //   });
-
-        //   await transporter.sendMail({
-        //     from: '"TAIPEI CUISINE 台北风味"<taipeicuisine68@gmail.com>', // sender address
-        //     to: "shawnwu1996@gmail.com", // list of receivers
-        //     subject: "Order Confirmation", // Subject line
-        //     html: generateOrderEmailHTML(firestore_order),
-        //   })
+          await transporter.sendMail({
+            from: '"TAIPEI CUISINE 台北风味"<taipeicuisine68@gmail.com>', // sender address
+            to: "shawnwu1996@gmail.com", // list of receivers
+            subject: "Order Confirmation", // Subject line
+            html: generateOrderEmailHTML(firestore_order),
+          }).catch((e) => {
+            console.log(e);
+          })
     })
 
     return {
@@ -164,8 +172,12 @@ export const handlePlaceOnlineOrder = async ({ user_id, cart, payment_intent_id}
     const { timestamp, date } = format_date();
 
     await firestore().runTransaction(async transaction => {
-        let order_ref = firestore().collection('orderTest').doc(cart.order_id);
-        let user_ref = firestore().collection('usersTest').doc(user_id)
+        const order_ref = firestore().collection('orderTest').doc(cart.order_id);
+        const user_ref = firestore().collection('usersTest').doc(user_id)
+        const store_ref = firestore().collection('store').doc(process.env.STORE_ID);
+
+        const store = (await store_ref.get()).data() as IStore;
+        checkStoreOperatingStatus(store);
 
         let user = (await transaction.get(user_ref)).data() as ICustomer
         if(!user){
@@ -390,5 +402,44 @@ export const validateIntentStatus = async (payment_intent: string) => {
         }
 
         throw new Error('Payment was not successful or cancelled')
+    }
+}
+
+export const checkStoreOperatingStatus = (data: IStore) => {
+      // first, check if the server is on 
+      if(!data.server_is_on){
+        throw new Error('Server is currently down, please check back later')
+    }
+
+    // third, check if there is a special hour on the day
+    let special_hour = data.hours.special_hour.find((hour) => {
+        return (hour.date.day === luxon_date.day) && (hour.date.month === luxon_date.month) && (hour.date.year === luxon_date.year)
+    })
+
+    if(special_hour){
+        // checks if the store is open with the special hour
+        if(!special_hour.open_for_business){
+            throw new Error(`The store will close entire day on ${special_hour.date.month}/${special_hour.date.day}/${special_hour.date.year}`)
+        }
+
+        // check if the store close early
+        if(currentMinute <= special_hour.open_hour || currentMinute >= special_hour.close_hour){
+            throw new Error(`The special operating hours for today are ${convert_minute_to_format_time(special_hour.open_hour)} - ${convert_minute_to_format_time(special_hour.close_hour)}`)
+        }
+    }
+
+    // third, check if within store operating hours
+    let regular_hour = data.hours.regular_hour.find((hour) => hour.day_of_week.toLowerCase() === luxon_date.weekdayLong.toLowerCase() )
+    if(regular_hour){
+        // check if the store is open on the day of the week
+        if(!regular_hour.open_for_business){
+            throw new Error(`The store is currently close on ${regular_hour.day_of_week}`)
+        }
+
+        // if the current minute is not within the range, throw error
+        if(currentMinute <= regular_hour.open_hour || currentMinute >= regular_hour.close_hour){
+            throw new Error(`The operating hours are ${convert_minute_to_format_time(regular_hour.open_hour)} - ${convert_minute_to_format_time(regular_hour.close_hour)}`)
+        }
+
     }
 }

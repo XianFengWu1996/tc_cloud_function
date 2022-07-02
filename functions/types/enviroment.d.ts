@@ -12,6 +12,8 @@ declare global {
         SMS_KEY: string,
         MAP_KEY: string,
         REWARD_PERCENTAGE: string,
+        NODEMAILER_USER: string,
+        NODEMAILER_PASS: string,
       }
     }
   }
