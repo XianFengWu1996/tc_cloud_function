@@ -14,6 +14,8 @@ declare global {
         REWARD_PERCENTAGE: string,
         NODEMAILER_USER: string,
         NODEMAILER_PASS: string,
+        TWILIO_SID: string,
+        TWILIO_TOKEN:string
       }
     }
   }

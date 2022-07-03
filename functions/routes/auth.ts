@@ -10,7 +10,7 @@ const auth = express.Router();
 auth.post('/login', checkFirebaseToken, authController.Signin);
 
 // MESSAGE 
-auth.post('/message/send', checkFirebaseToken, messageController.sendMessage);
+auth.post('/message/send', checkFirebaseToken, messageController.sendVerificationSMS);
 
 auth.post('/message/verify', checkFirebaseToken, messageController.verifyCode);
 

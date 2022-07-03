@@ -6,6 +6,9 @@ import { convert_minute_to_timestamp, hasExpire } from "../utils/time";
 import { isEmpty, isEqual } from "lodash";
 import { checkForValidPhoneNumber } from "../utils/validateData";
 
+import twilio from "twilio";
+
+
 interface ICodeData {
     expiration: number,
     code: number | string,
@@ -13,7 +16,7 @@ interface ICodeData {
     phone_num: string,
 }
 
-export const sendMessage = async (req: Request, res: Response) => {
+export const sendVerificationSMS = async (req: Request, res: Response) => {
     try {
         checkForValidPhoneNumber(req.body.phone);
 
@@ -22,6 +25,7 @@ export const sendMessage = async (req: Request, res: Response) => {
         let code = Math.floor(Math.random() * 899999 + 100000); // generate 6 digit code
         let c_id = v4();
 
+        // code to send sms using telnyx, but since we no longer going live, use twillio test account instead
         // let response = await axios.post('https://api.telnyx.com/v2/messages', {
         //     "from": "+15732241462",
         //     "to": "+19175787352",
@@ -34,11 +38,15 @@ export const sendMessage = async (req: Request, res: Response) => {
         //     }
         // })
 
-        // console.log(response.data)\
+        // console.log(response.data)
 
-        setTimeout(() => {
-            console.log(`${code} has been sent`);
-        }, 2000) // remove it later, just easy to see the code sent
+        let client = twilio(process.env.TWILIO_SID,process.env.TWILIO_TOKEN);
+
+        client.messages.create({
+            body: `Your verfication code for Taipei Cuisine is ${code}. Please do not share this code.`,
+            from: '+13342928198',
+            to: '+19175787352',
+        })
         
         await firestore().collection('/sms_verification').doc(c_id).set({
             c_id, 
@@ -102,7 +110,7 @@ export const verifyCode = async (req: Request, res: Response) => {
             transaction.delete(sms_ref)  // remove the document from firestore
             transaction.update(user_ref, {
                 phone: code_data.phone_num,
-            })  // update the phone and phone list
+            })  // update the phone
         })
         
         // remove the cookie
