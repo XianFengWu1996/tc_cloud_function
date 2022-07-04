@@ -15,12 +15,4 @@ payment.get('/payment_method', checkFirebaseToken, paymentController.getSavedPay
 
 payment.delete('/payment_method', checkFirebaseToken, paymentController.deletePaymentMethod)
 
-
-// order 
-payment.post("/place_online_order", checkFirebaseToken, paymentController.placeOnlineOrder);
-
-payment.post("/place_cash_order", checkFirebaseToken, paymentController.placeCashOrder)
-
-
-
 export default payment;
