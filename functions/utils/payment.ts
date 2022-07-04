@@ -59,7 +59,7 @@ const handleRewardPointCalculation = (_: IHandleRewardPointCalculation) => {
         }
 }
 
-export const handlePlaceCashOrder = async ({ user_id, cart}: IPlaceOrder) => {
+export const handlePlaceInstoreOrder = async ({ user_id, cart}: IPlaceOrder) => {
     let customer = {} as ICustomer;
     const { timestamp, date } = format_date();
  

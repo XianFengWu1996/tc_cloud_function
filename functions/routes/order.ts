@@ -1,12 +1,17 @@
 import express from 'express'
 import { checkFirebaseToken } from '../middleware/auth';
-import * as paymentController from '../controller/payment'
+import * as orderController from '../controller/order'
 
 const order = express.Router();
 
-// order 
-order.post("/place_online_order", checkFirebaseToken, paymentController.placeOnlineOrder);
 
-order.post("/place_cash_order", checkFirebaseToken, paymentController.placeCashOrder)
+/* ============================
+    Placing Order
+==============================*/
+
+// 
+order.post("/place_online_order", checkFirebaseToken, orderController.placeOnlineOrder);
+
+order.post("/place_instore_order", checkFirebaseToken, orderController.placeInstoreOrder)
 
 export default order;

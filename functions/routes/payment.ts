@@ -4,15 +4,26 @@ import * as paymentController from '../controller/payment'
 
 const payment = express.Router();
 
-// stripe payment
-payment.post("/update_payment_intent", checkFirebaseToken,paymentController.updatePaymentIntent);
 
-payment.post('/payment_method_id', checkFirebaseToken, paymentController.usePaymentMethodId)
+/* ============================
+    STRIPE PAYMENTS
+==============================*/  
 
-payment.post("/pay_with_intent", checkFirebaseToken, paymentController.usePaymentIntent)
+// retrieve all the available payment method for the customer
+payment.get('/payment_method_list', checkFirebaseToken, paymentController.getSavedPaymentMethodList)
 
-payment.get('/payment_method', checkFirebaseToken, paymentController.getSavedPaymentList)
+// update the intent when the customer is ready to pay
+payment.patch("/update_payment_intent", checkFirebaseToken,paymentController.updatePaymentIntent);
 
-payment.delete('/payment_method', checkFirebaseToken, paymentController.deletePaymentMethod)
+// remove the specific payment id with the payment method id provided
+payment.delete('/payment_method_by_id', checkFirebaseToken, paymentController.deletePaymentMethodById)
+
+// pay with the saved payment method
+payment.post('/pay_with_payment_method', checkFirebaseToken, paymentController.payWithSavedPaymentMethod)
+
+// paym with the payment intent (new card)
+payment.post("/pay_with_intent", checkFirebaseToken, paymentController.payWithPaymentIntent)
+
+
 
 export default payment;
