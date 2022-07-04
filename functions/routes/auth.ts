@@ -13,7 +13,6 @@ auth.get('/customer', checkFirebaseToken, customerController.getCustomerInfo);
 
 auth.patch('/customer/name', checkFirebaseToken, customerController.updateCustomerName);
 
-// ORDER
 auth.get('/customer/order_history', checkFirebaseToken, customerController.getOrderHistory)
 
 auth.get('/customer/reward_history', checkFirebaseToken, customerController.getRewardHistory)
