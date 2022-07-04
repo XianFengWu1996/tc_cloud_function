@@ -32,10 +32,20 @@ const payment_app = express();
 middleware(payment_app)
 payment_app.use('/', payment)
 
+const order_app = express();
+middleware(order_app)
+order_app.use('/', payment)
+
+const message_app = express();
+middleware(message_app)
+message_app.use('/', payment)
+
 exports.admin = functions.region('us-east4').https.onRequest(admin_app);
 exports.store = functions.region('us-east4').https.onRequest(store_app);
 exports.auth = functions.region('us-east4').https.onRequest(auth_app);
 exports.payment = functions.region('us-east4').https.onRequest(payment_app);
+exports.message = functions.region('us-east4').https.onRequest(message_app);
+exports.order = functions.region('us-east4').https.onRequest(order_app);
 
   
 
