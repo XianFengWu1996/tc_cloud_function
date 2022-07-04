@@ -20,7 +20,7 @@ customer.get('/reward_history', checkFirebaseToken, customerController.getReward
 
 // ADDRESS
 // calculate the delivery charge
-customer.post('/address/delivery', checkFirebaseToken, customerController.calculateDelivery)
+customer.post('/address/calc_delivery', checkFirebaseToken, customerController.calculateDelivery)
 
 // update apt and business
 customer.patch('/address/apt_business', checkFirebaseToken, customerController.updateAptAndBusiness)
