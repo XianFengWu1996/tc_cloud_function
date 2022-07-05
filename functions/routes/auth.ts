@@ -4,7 +4,12 @@ import { checkFirebaseToken } from '../middleware/auth';
 
 const auth = express.Router();
 
-// authentication
+
+/* ============================
+   AUTHENTICATION
+==============================*/
+
+// handle the login process
 auth.post('/login', checkFirebaseToken, authController.Signin);
 
 export default auth

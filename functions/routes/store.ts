@@ -7,6 +7,7 @@ import * as storeController from '../controller/store';
 
 const store = express.Router();
 
+// get all the menu data, also return the store data
 store.get('/menus', storeController.getMenuData);
 
 // store.get('/remove_unactive', async (req, res) => {

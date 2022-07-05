@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Stripe from "stripe";
 import { validateCart } from "../utils/validateData";
-import { createPaymentIntent, generatePublicPaymentList, getCustomerId, handleConfirmingOrder, handlePlaceCashOrder, handlePlaceOnlineOrder, retrieveIntentFromCookie } from '../utils/payment'
+import { createPaymentIntent, generatePublicPaymentList, getCustomerId, handleConfirmingOrder, retrieveIntentFromCookie } from '../utils/payment'
 import { firestore } from "firebase-admin";
 import { isBoolean, isEmpty, isNumber, isString } from "lodash";
 import {  format_date } from "../utils/time";
