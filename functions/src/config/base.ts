@@ -7,7 +7,7 @@ import cors from 'cors'
 export const middleware = (app: Express) => {
     app.use(helmet());
     app.use(cors({ 
-        origin: ['https://tc-demo-v1.vercel.app/order'], 
+        origin: ['https://tc-demo-v1.vercel.app'], 
         // origin: '*',
         credentials: true,
     }));
