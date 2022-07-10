@@ -1,6 +1,7 @@
 {
   "projects": {
-    "store_info": "foodorder-43af7"
+    "store_info": "foodorder-43af7",
+    "default": "foodorder-43af7"
   },
   "targets": {}
 }

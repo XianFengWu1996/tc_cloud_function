@@ -1,5 +1,5 @@
 import express from 'express';
-import * as storeController from '../controller/store';
+import * as storeController from '../../controller/store';
 // import {  checkTokenInCookie } from '../middleware/auth';
 // import { filesUpload } from '../middleware/upload'
 // import { body } from 'express-validator';

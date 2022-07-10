@@ -1,6 +1,6 @@
 import express from 'express'
-import { checkFirebaseToken } from '../middleware/auth';
-import * as messageController  from '../controller/message'
+import { checkFirebaseToken } from '../../middleware/auth';
+import * as messageController  from '../../controller/message'
 
 const message = express.Router();
 
