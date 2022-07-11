@@ -45,7 +45,7 @@ export const sendVerificationSMS = async (req: Request, res: Response) => {
         client.messages.create({
             body: `Your verfication code for Taipei Cuisine is ${code}. Please do not share this code.`,
             from: '+13342928198',
-            to: '+19175787352',
+            to: `+1${phone_num}`,
         })
         
         await firestore().collection('/sms_verification').doc(c_id).set({

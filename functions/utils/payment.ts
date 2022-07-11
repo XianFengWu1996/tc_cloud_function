@@ -6,10 +6,11 @@ import { stripe } from "../controller/payment";
 import { generateOrderEmailHTML } from "./email/order_email";
 import nodemailer from 'nodemailer'
 import { convert_minute_to_format_time, currentMinute, format_date, luxon_date } from "./time";
+import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 
 
 interface IPlaceOrder {
-    user_id: string,
+    user: DecodedIdToken,
     cart: ICart,
     payment_intent_id: string,
 }
@@ -18,6 +19,7 @@ interface IHandleRewardPointCalculation {
     cart: ICart,
     customer:ICustomer,
 }
+
 const handleRewardPointCalculation = (_: IHandleRewardPointCalculation) => {
         const { timestamp } = format_date();
 
@@ -59,14 +61,14 @@ const handleRewardPointCalculation = (_: IHandleRewardPointCalculation) => {
         }
 }
 
-export const handlePlaceInstoreOrder = async ({ user_id, cart}: IPlaceOrder) => {
+export const handlePlaceInstoreOrder = async ({ user, cart}: IPlaceOrder) => {
     let customer = {} as ICustomer;
     const { timestamp, date } = format_date();
  
 
     await firestore().runTransaction(async transaction => {
         const order_ref = firestore().collection('orderTest').doc(cart.order_id);
-        const user_ref = firestore().collection('usersTest').doc(user_id)
+        const user_ref = firestore().collection('usersTest').doc(user.uid)
         const store_ref = firestore().collection('store').doc(process.env.STORE_ID);
 
         const store = (await store_ref.get()).data() as IStore;
@@ -91,7 +93,7 @@ export const handlePlaceInstoreOrder = async ({ user_id, cart}: IPlaceOrder) => 
         let firestore_order = {
             order_id: cart.order_id,
             user: {
-                user_id: user_id,
+                user_id: user.uid,
                 name: customer.name,
                 phone: customer.phone,
             },
@@ -155,7 +157,7 @@ export const handlePlaceInstoreOrder = async ({ user_id, cart}: IPlaceOrder) => 
 
           await transporter.sendMail({
             from: '"TAIPEI CUISINE 台北风味"<taipeicuisine68@gmail.com>', // sender address
-            to: "shawnwu1996@gmail.com", // list of receivers
+            to: `${user.email}`,
             subject: "Order Confirmation", // Subject line
             html: generateOrderEmailHTML(firestore_order),
           }).catch((e) => {
@@ -168,26 +170,26 @@ export const handlePlaceInstoreOrder = async ({ user_id, cart}: IPlaceOrder) => 
     }
 } 
 
-export const handlePlaceOnlineOrder = async ({ user_id, cart, payment_intent_id}: IPlaceOrder) => {
+export const handlePlaceOnlineOrder = async ({ user, cart, payment_intent_id}: IPlaceOrder) => {
     const { timestamp, date } = format_date();
 
     await firestore().runTransaction(async transaction => {
         const order_ref = firestore().collection('orderTest').doc(cart.order_id);
-        const user_ref = firestore().collection('usersTest').doc(user_id)
+        const user_ref = firestore().collection('usersTest').doc(user.uid)
         const store_ref = firestore().collection('store').doc(process.env.STORE_ID);
 
         const store = (await store_ref.get()).data() as IStore;
         checkStoreOperatingStatus(store);
 
-        let user = (await transaction.get(user_ref)).data() as ICustomer
-        if(!user){
+        let fbUser = (await transaction.get(user_ref)).data() as ICustomer
+        if(!fbUser){
             throw new Error('User data not found')
         }
         
-        transaction.set(order_ref, {
+        let firestore_order = {
             order_id: cart.order_id,
             user: {
-                user_id: user_id,
+                user_id: user.uid,
                 name: user.name,
                 phone: user.phone,
             },
@@ -235,7 +237,28 @@ export const handlePlaceOnlineOrder = async ({ user_id, cart, payment_intent_id}
             },
             order_status: 'required_payment',
             created_at: timestamp,
-        } as IFirestoreOrder, { merge: true })            
+        } as IFirestoreOrder
+
+        transaction.set(order_ref, firestore_order, { merge: true }) 
+        
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false, // true for 465, false for other ports
+            auth: {
+              user: process.env.NODEMAILER_USER,
+              pass: process.env.NODEMAILER_PASS, 
+            },
+          });
+
+        await transporter.sendMail({
+            from: '"TAIPEI CUISINE 台北风味"<taipeicuisine68@gmail.com>', // sender address
+            to: `${user.email}`,
+            subject: "Order Confirmation", // Subject line
+            html: generateOrderEmailHTML(firestore_order),
+          }).catch((e) => {
+            console.log(e);
+          })
     })
 } 
 

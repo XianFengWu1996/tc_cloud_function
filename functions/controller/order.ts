@@ -10,7 +10,7 @@ export const placeOnlineOrder =  async (req: Request, res: Response) => {
         validateCart(req.body.cart);
         // place the order to firestore
         await handlePlaceOnlineOrder({ 
-            user_id: req.user.uid, 
+            user: req.user, 
             cart: req.body.cart as ICart, 
             payment_intent_id: ''
         });
@@ -31,7 +31,7 @@ export const placeInstoreOrder = async (req: Request, res: Response) => {
          validateCart(cart);
         // place the order to firestore
         let { customer } = await handlePlaceInstoreOrder({ 
-            user_id: req.user.uid, 
+            user: req.user, 
             cart: req.body.cart as ICart,
             payment_intent_id: '',
         })
