@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { format_date } from "../utils/time";
-import { handlePlaceInstoreOrder, handlePlaceOnlineOrder } from "../utils/payment";
-import { validateCart } from "../utils/validateData";
+import { format_date } from "../../utils/time";
+import { handlePlaceInstoreOrder, handlePlaceOnlineOrder } from "../../utils/payment";
+import { validateCart } from "../../utils/validateData";
 
 // place an online order but not process the payment yet
 export const placeOnlineOrder =  async (req: Request, res: Response) => {

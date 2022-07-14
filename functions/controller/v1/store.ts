@@ -1,13 +1,7 @@
 import { Request, Response } from "express";
 import admin, { firestore } from "firebase-admin";
-import { convert_minute_to_timestamp } from "../utils/time";
-import { filterDishFromDoc } from "../utils/menu";
-
-// import { checkForAdminStatus } from "./admin";
-// import { createPersistentDownloadUrl } from '../utils/url'
-// import { checkForValidDishData } from '../utils/validateData'
-// import { v4 } from 'uuid'
-// import { validationResult } from "express-validator";
+import { convert_minute_to_timestamp } from "../../utils/time";
+import { filterDishFromDoc } from "../../utils/menu";
 
 export const getMenuData = async(req: Request, res:Response) => {
     try {
@@ -257,3 +251,8 @@ export const getMenuData = async(req: Request, res:Response) => {
 
 //     res.send(temp);
 // }
+
+
+
+// version 2 
+

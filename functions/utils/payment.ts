@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { firestore } from "firebase-admin"
 import { isEmpty, isString } from "lodash";
 import Stripe from "stripe";
-import { stripe } from "../controller/payment";
+import { stripe } from "../controller/v1/payment";
 import { generateOrderEmailHTML } from "./email/order_email";
 import nodemailer from 'nodemailer'
 import { convert_minute_to_format_time, currentMinute, format_date, luxon_date } from "./time";

@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import axios from 'axios';
 import { v4 } from 'uuid' 
 import { firestore } from 'firebase-admin'
-import { convert_minute_to_timestamp, hasExpire } from "../utils/time";
+import { convert_minute_to_timestamp, hasExpire } from "../../utils/time";
 import { isEmpty, isEqual } from "lodash";
-import { checkForValidPhoneNumber } from "../utils/validateData";
+import { checkForValidPhoneNumber } from "../../utils/validateData";
 
 import twilio from "twilio";
 

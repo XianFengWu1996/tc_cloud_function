@@ -3,12 +3,18 @@ import { initializeApp } from "firebase-admin/app";
 
 import express from 'express'
 import * as functions from "firebase-functions";
+// version 1
 import store from '../routes/v1/store'
 import auth from '../routes/v1/auth'
 import customer from '../routes/v1/customer'
 import message from '../routes/v1/message'
 import order from '../routes/v1/order'
 import payment from '../routes/v1/payment'
+
+//version 2
+import store_v2 from '../routes/v2/store'
+
+
 
 import { middleware } from './config/base';
 
@@ -27,7 +33,13 @@ version_1.use('/customer', customer);
 version_1.use('/message', message);
 version_1.use('/order', order);
 
+const version_2 = express();
+middleware(version_2);
+version_2.use('/store', store_v2);
+
 exports.v1 = functions.region('us-east4').https.onRequest(version_1);
+exports.v2 = functions.region('us-east4').https.onRequest(version_2);
+
 
 
   

@@ -1,6 +1,6 @@
 import express from 'express'
 import { checkFirebaseToken } from '../../middleware/auth';
-import * as paymentController from '../../controller/payment'
+import * as paymentController from '../../controller/v1/payment'
 
 const payment = express.Router();
 
