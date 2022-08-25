@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import e, { Request, Response } from "express";
 import { firestore } from "firebase-admin"
 import { isEmpty, isString } from "lodash";
 import Stripe from "stripe";
@@ -185,17 +185,18 @@ export const handlePlaceOnlineOrder = async ({ user, cart, payment_intent_id}: I
         if(!fbUser){
             throw new Error('User data not found')
         }
+
         
         let firestore_order = {
             order_id: cart.order_id,
             user: {
                 user_id: user.uid,
-                name: user.name,
-                phone: user.phone,
+                name: fbUser.name,
+                phone: fbUser.phone,
             },
             payment: {
                 payment_type: cart.payment_type,
-                customer_id: user.billings.stripe_customer_id,
+                customer_id: fbUser.billings.stripe_customer_id,
                 stripe: {
                     payment_intent_id: payment_intent_id,
                 },
@@ -219,7 +220,7 @@ export const handlePlaceOnlineOrder = async ({ user, cart, payment_intent_id}: I
             },
             delivery: {
                 is_delivery: cart.is_delivery,
-                address: cart.is_delivery ? user.address : null
+                address: cart.is_delivery ? fbUser.address : null
             },
             additional_request: {
                 dont_include_utensils: cart.dont_include_utensils,
@@ -240,25 +241,6 @@ export const handlePlaceOnlineOrder = async ({ user, cart, payment_intent_id}: I
         } as IFirestoreOrder
 
         transaction.set(order_ref, firestore_order, { merge: true }) 
-        
-        let transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587,
-            secure: false, // true for 465, false for other ports
-            auth: {
-              user: process.env.NODEMAILER_USER,
-              pass: process.env.NODEMAILER_PASS, 
-            },
-          });
-
-        await transporter.sendMail({
-            from: '"TAIPEI CUISINE 台北风味"<taipeicuisine68@gmail.com>', // sender address
-            to: `${user.email}`,
-            subject: "Order Confirmation", // Subject line
-            html: generateOrderEmailHTML(firestore_order),
-          }).catch((e) => {
-            console.log(e);
-          })
     })
 } 
 
