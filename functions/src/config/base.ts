@@ -8,10 +8,10 @@ export const middleware = (app: Express) => {
     app.use(helmet());
     app.use(cors({ 
         origin: ['https://tc-demo-v1.vercel.app', 'http://localhost:3000'], 
-        // origin: '*',
         credentials: true,
     }));
     app.use(bodyParser.urlencoded({extended: true}));
     app.use(bodyParser.json());
     app.use(cookieParser());
+    app.enable('trust proxy')
 }

@@ -7,7 +7,7 @@ import { isBoolean, isEmpty, isNumber, isString } from "lodash";
 import {  format_date } from "../../utils/time";
 
 
-export const stripe = new Stripe('sk_test_zXSjQbIUWTqONah6drD5oFvC00islas5P7', {
+export const stripe = new Stripe(process.env.STRIPE_KEY, {
     apiVersion: '2020-08-27',
 });
 
@@ -30,9 +30,9 @@ export const getSavedPaymentMethodList = async ( req: Request, res: Response) =>
         // fetch the available payment method and generate a list
         let cards = await generatePublicPaymentList(customer_id)
 
-        await createPaymentIntent(req, res, customer_id);
-        
-        res.send({ cards })
+        let client_secret = await createPaymentIntent(req, res, customer_id);
+        console.log(client_secret)
+        res.send({ cards, client_secret })
 
     } catch (error) {
         res.status(400).send({ error: (error as Error).message ?? 'Failed to get payment list'})

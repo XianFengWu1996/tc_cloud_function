@@ -15,7 +15,9 @@ declare global {
         NODEMAILER_USER: string,
         NODEMAILER_PASS: string,
         TWILIO_SID: string,
-        TWILIO_TOKEN:string
+        TWILIO_TOKEN:string,
+        STRIPE_KEY:string,
+        STRIPE_VERSION:string,
       }
     }
   }

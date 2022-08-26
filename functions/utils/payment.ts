@@ -1,4 +1,4 @@
-import e, { Request, Response } from "express";
+import { Request, Response } from "express";
 import { firestore } from "firebase-admin"
 import { isEmpty, isString } from "lodash";
 import Stripe from "stripe";
@@ -7,6 +7,7 @@ import { generateOrderEmailHTML } from "./email/order_email";
 import nodemailer from 'nodemailer'
 import { convert_minute_to_format_time, currentMinute, format_date, luxon_date } from "./time";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
+import cookieSession from 'cookie-session'
 
 
 interface IPlaceOrder {
@@ -351,7 +352,8 @@ export const createPaymentIntent = async (req: Request, res: Response, customer_
             }
         });
         // set the cookie for payment intent
-        res.cookie('s_id', paymentIntent.client_secret);
+
+        return paymentIntent.client_secret
     }
 }
 
