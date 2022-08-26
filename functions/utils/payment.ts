@@ -7,7 +7,6 @@ import { generateOrderEmailHTML } from "./email/order_email";
 import nodemailer from 'nodemailer'
 import { convert_minute_to_format_time, currentMinute, format_date, luxon_date } from "./time";
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
-import cookieSession from 'cookie-session'
 
 
 interface IPlaceOrder {
