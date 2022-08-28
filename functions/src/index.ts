@@ -13,6 +13,7 @@ import payment from '../routes/v1/payment'
 
 //version 2
 import store_v2 from '../routes/v2/store'
+import payment_v2 from '../routes/v2/payment'
 
 
 
@@ -36,6 +37,8 @@ version_1.use('/order', order);
 const version_2 = express();
 middleware(version_2);
 version_2.use('/store', store_v2);
+version_2.use('/payment', payment_v2);
+
 
 exports.v1 = functions.region('us-east4').https.onRequest(version_1);
 exports.v2 = functions.region('us-east4').https.onRequest(version_2);

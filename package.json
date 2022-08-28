@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "cookie-session": "^2.0.0"
+    "cookie-session": "^2.0.0",
+    "stripe": "^10.6.0"
   },
   "devDependencies": {
     "@types/cookie-session": "^2.0.44"
