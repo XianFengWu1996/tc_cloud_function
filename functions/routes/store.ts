@@ -1,14 +1,13 @@
-import express from 'express';
-import * as storeController from '../../controller/v1/store';
+import express from "express";
+import * as storeController from "../controller/store";
 // import {  checkTokenInCookie } from '../middleware/auth';
 // import { filesUpload } from '../middleware/upload'
 // import { body } from 'express-validator';
 
-
 const store = express.Router();
 
 // get all the menu data, also return the store data
-store.get('/menus', storeController.getMenuData);
+store.get("/menus", storeController.getMenuData);
 
 // store.get('/remove_unactive', async (req, res) => {
 //     try {
@@ -29,8 +28,7 @@ store.get('/menus', storeController.getMenuData);
 //     }
 // })
 
-
-// // ADMIN 
+// // ADMIN
 // store.post('/hours', checkTokenInCookie, [
 //     body('hours').isArray({ min:7, max: 7}).withMessage('Invalid number of days'),
 //     body('hours.*.day_of_week').isString().trim(),
@@ -40,11 +38,9 @@ store.get('/menus', storeController.getMenuData);
 
 // store.post('/status', checkTokenInCookie, storeController.updateServerStatus);
 
-
 // store.patch('/menus/:dishId',checkTokenInCookie, storeController.updateMenu);
 
 // store.post('/menus/image/upload', checkTokenInCookie, filesUpload, storeController.uploadImage)
-
 
 export default store;
 
@@ -53,7 +49,7 @@ export default store;
 //         let lunch: ICategory[] = []
 //         // let fullday = await firestore().collection(`/menus/${process.env.STORE_ID}/fullday`).get()
 //         let lunch_result = await firestore().collection(`/menus/${process.env.STORE_ID}/lunch`).get()
-        
+
 //         lunch_result.docs.map((val) => {
 //             let data = val.data() as ICategory;
 //             lunch.push(data);
@@ -95,7 +91,7 @@ export default store;
 
 //         })
 
-//         res.send({ 
+//         res.send({
 //             // lunch
 //             fullday
 //         })
