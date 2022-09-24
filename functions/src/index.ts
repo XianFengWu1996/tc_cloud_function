@@ -22,13 +22,6 @@ initializeApp(); // initialize firebase app
 
 // create a express app for version 1, will be version 2 later on
 const app = express();
-app.use("/store", store);
-app.use("/auth", auth);
-app.use("/payment", payment);
-app.use("/customer", customer);
-app.use("/message", message);
-app.use("/order", order);
-
 app.use(helmet());
 app.use(
   cors({
@@ -40,5 +33,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.enable("trust proxy");
+
+app.use("/store", store);
+app.use("/auth", auth);
+app.use("/payment", payment);
+app.use("/customer", customer);
+app.use("/message", message);
+app.use("/order", order);
 
 exports.v1 = functions.region("us-east4").https.onRequest(app);
